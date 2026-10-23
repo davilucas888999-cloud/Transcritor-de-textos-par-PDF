@@ -1,17 +1,1583 @@
-<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Textos por Turma</title><style>
-:root{--wine:#79283b;--dark:#5d1c2c;--pink:#f7e9ed;--line:#e7cfd6;--text:#30272a;--muted:#75666b}*{box-sizing:border-box}body{margin:0;background:linear-gradient(135deg,#fbf3f5,#fff);font-family:Arial,sans-serif;color:var(--text)}header{text-align:center;background:#fff;padding:27px 15px;border-bottom:1px solid var(--line);position:relative}header:before,header:after{content:'❦';position:absolute;top:20px;color:#c28b99;font-size:27px}header:before{left:calc(50% - 180px)}header:after{right:calc(50% - 180px)}h1{font: bold clamp(26px,4vw,36px) Georgia,serif;color:var(--wine);margin:0}header p{color:var(--muted);font-size:14px;margin:8px 0 0}main{width:min(1000px,calc(100% - 28px));margin:28px auto}.panel{position:relative;background:#fff;border:1px solid var(--line);border-radius:17px;padding:clamp(18px,3vw,30px);box-shadow:0 12px 32px #57202d16}.panel:before,.modal:before{content:'';position:absolute;inset:7px;border:1px solid #f0e1e5;border-radius:11px;pointer-events:none}.panel>*{position:relative}.bar{display:grid;grid-template-columns:1fr auto;gap:12px;align-items:end}label{display:block;font-size:13px;font-weight:bold;color:var(--dark);margin:0 0 7px}input,select,textarea{width:100%;padding:11px 12px;border:1px solid #d8bdc6;border-radius:9px;background:white;font:inherit;color:var(--text)}input:focus,select:focus,textarea:focus{outline:2px solid #79283b22;border-color:var(--wine)}button{background:var(--wine);color:white;border:0;border-radius:9px;padding:11px 16px;font-weight:bold;cursor:pointer}button:hover{background:var(--dark)}button.secondary{background:var(--pink);color:var(--dark);border:1px solid var(--line)}button:disabled{opacity:.45;cursor:not-allowed}.hint{font-size:13px;color:var(--muted);margin:9px 0 0}.section{margin-top:25px}.sectionhead{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:14px}h2{font: bold 21px Georgia,serif;color:var(--wine);margin:0}.list{display:flex;flex-direction:column;gap:9px}.item{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:12px;align-items:center;padding:14px 15px;border:1px solid var(--line);border-radius:12px;background:#fff}.item strong{display:block}.item small{display:block;color:var(--muted);margin-top:5px}.badge{display:inline-block;background:var(--pink);color:var(--dark);padding:4px 8px;border-radius:30px;font-size:12px;font-weight:bold}.empty{padding:23px;text-align:center;border:1px dashed #d9b8c2;border-radius:12px;color:var(--muted);background:#fffafb}.actions{position:relative}.actions>button{min-width:105px}.menu{display:none;position:absolute;right:0;top:100%;z-index:20;min-width:175px;background:#fff;border:1px solid var(--line);border-radius:10px;padding:5px;box-shadow:0 12px 30px #32101c22}.actions:hover .menu,.actions:focus-within .menu{display:block}.menu button{display:block;width:100%;text-align:left;background:#fff;color:var(--text);padding:10px;transform:none}.menu button:hover{background:var(--pink);color:var(--wine)}.backdrop{display:none;position:fixed;inset:0;background:#25101880;z-index:100;align-items:center;justify-content:center;padding:16px}.backdrop.open{display:flex}.modal{position:relative;width:min(620px,100%);max-height:90vh;overflow:auto;background:#fffdfd;border:1px solid var(--line);border-radius:17px;padding:25px;box-shadow:0 25px 70px #0004}.modal>*{position:relative}.modal h2{margin-bottom:18px;padding-right:35px}.close{position:absolute;right:13px;top:10px;background:transparent;color:var(--wine);font-size:26px;padding:3px 9px;z-index:2}.close:hover{background:var(--pink)}.field{margin-bottom:14px}.field textarea{min-height:240px;resize:vertical;line-height:1.55}.foot{display:flex;justify-content:flex-end;gap:9px;flex-wrap:wrap;margin-top:18px}.footnote{text-align:center;color:#927a81;font-size:12px;margin-top:17px}@media(max-width:600px){.bar{grid-template-columns:1fr}.item{grid-template-columns:1fr}.actions{justify-self:start}header:before{left:12px}header:after{right:12px}}
-</style></head><body><header><h1>Textos por Turma</h1><p>Cadastre turmas e alunos, organize os textos e prepare as folhas individuais.</p></header><main><section class="panel"><div class="bar"><div><label for="acao">Ação</label><select id="acao"><option value="">Selecione uma ação...</option><option value="turmas">Cadastrar / consultar turmas</option><option value="alunos">Cadastrar / consultar alunos</option><option value="textos">Lançar textos</option></select></div><button id="buscar">Buscar</button></div><p class="hint">Escolha uma ação e clique em Buscar. Cadastros e edições abrem em pop-ups.</p><div id="resultado" class="section"></div><div class="footnote">Os dados ficam guardados neste navegador. Exporte ou faça uma cópia de segurança regularmente.</div></section></main><div class="backdrop" id="backdrop" role="dialog" aria-modal="true"><div class="modal"><button class="close" id="close" aria-label="Fechar">×</button><h2 id="modalTitle"></h2><div id="modalBody"></div></div></div>
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#70263b">
+<title>Textos Escolares | Gestão Literária</title>
+<style>
+:root {
+  --wine: #70263b;
+  --wine-dark: #51192b;
+  --wine-soft: #8d4055;
+  --rose: #f8e9ed;
+  --rose-light: #fff8fa;
+  --rose-border: #ead1d8;
+  --ink: #332a2d;
+  --muted: #7b7074;
+  --line: #eee3e6;
+  --paper: #ffffff;
+  --surface: #fffdfd;
+  --success: #286a4d;
+  --success-bg: #eaf6ef;
+  --warning: #8a5b14;
+  --warning-bg: #fff5df;
+  --danger: #a33245;
+  --danger-bg: #fff0f2;
+  --shadow: 0 12px 32px rgba(78, 27, 43, .08);
+  --radius: 14px;
+}
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+  margin: 0;
+  min-height: 100vh;
+  color: var(--ink);
+  background:
+    radial-gradient(circle at 4% 3%, rgba(248,233,237,.72), transparent 22rem),
+    linear-gradient(180deg, #fffafb 0%, #fff 46%, #fffdfd 100%);
+  font-family: "Segoe UI", Arial, sans-serif;
+  font-size: 14px;
+  line-height: 1.5;
+}
+button, input, select, textarea { font: inherit; }
+button { cursor: pointer; }
+button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible {
+  outline: 3px solid rgba(141,64,85,.25);
+  outline-offset: 2px;
+}
+button:disabled { cursor: not-allowed; opacity: .48; }
+.topbar {
+  position: sticky;
+  top: 0;
+  z-index: 30;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 15px clamp(16px, 4vw, 42px);
+  background: rgba(255,255,255,.92);
+  border-bottom: 1px solid var(--rose-border);
+  backdrop-filter: blur(12px);
+}
+.brand { display: flex; align-items: center; gap: 12px; min-width: 0; }
+.brand-mark {
+  display: grid;
+  place-items: center;
+  width: 42px;
+  height: 42px;
+  flex: 0 0 42px;
+  border: 1px solid #d7aab6;
+  border-radius: 12px;
+  color: var(--wine);
+  background: linear-gradient(145deg, #fff, #f8e9ed);
+  font-family: Georgia, serif;
+  font-size: 21px;
+  font-weight: 700;
+}
+.brand-copy { min-width: 0; }
+.brand-copy strong {
+  display: block;
+  color: var(--wine-dark);
+  font-family: Georgia, serif;
+  font-size: 18px;
+  letter-spacing: .01em;
+}
+.brand-copy span { display: block; color: var(--muted); font-size: 12px; }
+.header-actions { display: flex; align-items: center; gap: 10px; }
+.icon-button {
+  display: grid;
+  place-items: center;
+  width: 42px;
+  height: 42px;
+  padding: 0;
+  color: var(--wine);
+  background: #fff;
+  border: 1px solid var(--rose-border);
+  border-radius: 11px;
+}
+.icon-button:hover { background: var(--rose-light); }
+.hamburger { display: flex; flex-direction: column; gap: 5px; }
+.hamburger span { display: block; width: 18px; height: 2px; background: currentColor; border-radius: 3px; }
+.menu-wrap { position: relative; }
+.dropdown-menu {
+  position: absolute;
+  top: calc(100% + 9px);
+  right: 0;
+  width: 250px;
+  padding: 7px;
+  background: #fff;
+  border: 1px solid var(--rose-border);
+  border-radius: 13px;
+  box-shadow: var(--shadow);
+  display: none;
+  z-index: 50;
+}
+.dropdown-menu.open { display: block; }
+.dropdown-menu button {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 11px 12px;
+  text-align: left;
+  color: var(--ink);
+  background: transparent;
+  border: 0;
+  border-radius: 8px;
+}
+.dropdown-menu button:hover { color: var(--wine); background: var(--rose-light); }
+.dropdown-menu .menu-symbol { width: 24px; color: var(--wine); text-align: center; font-size: 17px; }
+main { width: min(1160px, calc(100% - 32px)); margin: 30px auto 54px; }
+.hero {
+  position: relative;
+  overflow: hidden;
+  padding: clamp(23px, 4vw, 38px);
+  margin-bottom: 23px;
+  background: linear-gradient(115deg, #fff 0%, #fff8fa 70%, #f9e8ed 100%);
+  border: 1px solid var(--rose-border);
+  border-radius: 18px;
+  box-shadow: 0 5px 20px rgba(78,27,43,.035);
+}
+.hero:after {
+  content: "❧";
+  position: absolute;
+  right: 28px;
+  bottom: -32px;
+  color: rgba(112,38,59,.10);
+  font-family: Georgia, serif;
+  font-size: 130px;
+  line-height: 1;
+  pointer-events: none;
+}
+.eyebrow {
+  margin: 0 0 8px;
+  color: var(--wine-soft);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: .17em;
+  text-transform: uppercase;
+}
+h1, h2, h3, p { margin-top: 0; }
+h1 {
+  margin-bottom: 10px;
+  color: var(--wine-dark);
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: clamp(27px, 4vw, 38px);
+  font-weight: 500;
+  line-height: 1.15;
+}
+.hero p { max-width: 640px; margin-bottom: 0; color: var(--muted); font-size: 15px; }
+.section-card {
+  padding: clamp(18px, 3vw, 27px);
+  margin-bottom: 20px;
+  background: var(--paper);
+  border: 1px solid var(--rose-border);
+  border-radius: var(--radius);
+  box-shadow: 0 5px 22px rgba(78,27,43,.035);
+}
+.section-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 14px;
+  margin-bottom: 20px;
+}
+.section-heading h2 {
+  margin-bottom: 4px;
+  color: var(--wine-dark);
+  font-family: Georgia, serif;
+  font-size: 22px;
+  font-weight: 500;
+}
+.section-heading p { margin-bottom: 0; color: var(--muted); font-size: 13px; }
+.action-row {
+  display: grid;
+  grid-template-columns: minmax(220px, 1fr) auto;
+  align-items: end;
+  gap: 12px;
+}
+.field { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+.field label { color: #59464d; font-size: 12px; font-weight: 700; }
+.field input, .field select, .field textarea {
+  width: 100%;
+  min-height: 43px;
+  padding: 10px 12px;
+  color: var(--ink);
+  background: #fff;
+  border: 1px solid #dfcbd1;
+  border-radius: 9px;
+  transition: border-color .15s, box-shadow .15s;
+}
+.field input:focus, .field select:focus, .field textarea:focus {
+  border-color: var(--wine-soft);
+  box-shadow: 0 0 0 3px rgba(141,64,85,.08);
+  outline: none;
+}
+.field textarea { min-height: 240px; resize: vertical; line-height: 1.7; }
+.helper { color: var(--muted); font-size: 11px; }
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 42px;
+  padding: 10px 16px;
+  border: 1px solid transparent;
+  border-radius: 9px;
+  font-weight: 700;
+  text-decoration: none;
+  transition: background .15s, border-color .15s, transform .15s;
+  white-space: nowrap;
+}
+.btn:active:not(:disabled) { transform: translateY(1px); }
+.btn-primary { color: #fff; background: var(--wine); border-color: var(--wine); }
+.btn-primary:hover:not(:disabled) { background: var(--wine-dark); }
+.btn-secondary { color: var(--wine); background: #fff; border-color: #d9b5bf; }
+.btn-secondary:hover:not(:disabled) { background: var(--rose-light); }
+.btn-soft { color: var(--wine); background: var(--rose); border-color: #f0dce2; }
+.btn-danger { color: var(--danger); background: #fff; border-color: #e8bfc7; }
+.btn-small { min-height: 34px; padding: 6px 10px; font-size: 12px; border-radius: 8px; }
+.content-area { margin-top: 22px; }
+.empty-state {
+  padding: 35px 18px;
+  text-align: center;
+  color: var(--muted);
+  background: #fffafb;
+  border: 1px dashed #e2c8d0;
+  border-radius: 12px;
+}
+.empty-state strong { display: block; margin-bottom: 5px; color: var(--wine-dark); font-family: Georgia, serif; font-size: 18px; }
+.empty-symbol { display: block; margin-bottom: 9px; color: #b77b8c; font-size: 26px; }
+.list-toolbar { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 13px; }
+.list-toolbar .count { color: var(--muted); font-size: 12px; }
+.records { display: grid; gap: 9px; }
+.record {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 15px;
+  padding: 14px 15px;
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 11px;
+}
+.record:hover { border-color: #dfc0c9; }
+.record-main { min-width: 0; }
+.record-title { display: block; margin-bottom: 3px; color: var(--wine-dark); font-weight: 750; overflow-wrap: anywhere; }
+.record-meta { display: flex; flex-wrap: wrap; gap: 7px 12px; color: var(--muted); font-size: 12px; }
+.record-actions { display: flex; flex-wrap: wrap; align-items: center; justify-content: flex-end; gap: 7px; }
+.status {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 8px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 750;
+  white-space: nowrap;
+}
+.status.done { color: var(--success); background: var(--success-bg); }
+.status.pending { color: var(--warning); background: var(--warning-bg); }
+.status.neutral { color: var(--muted); background: #f3eff0; }
+.actions-holder { position: relative; }
+.actions-menu {
+  position: absolute;
+  top: calc(100% + 5px);
+  right: 0;
+  z-index: 20;
+  display: none;
+  width: 190px;
+  padding: 5px;
+  background: #fff;
+  border: 1px solid var(--rose-border);
+  border-radius: 10px;
+  box-shadow: var(--shadow);
+}
+.actions-menu.open { display: block; }
+.actions-menu button {
+  display: block;
+  width: 100%;
+  padding: 9px 10px;
+  color: var(--ink);
+  text-align: left;
+  background: transparent;
+  border: 0;
+  border-radius: 7px;
+  font-size: 12px;
+}
+.actions-menu button:hover { color: var(--wine); background: var(--rose-light); }
+.notice {
+  padding: 13px 15px;
+  margin: 12px 0;
+  border: 1px solid;
+  border-radius: 10px;
+  font-size: 13px;
+}
+.notice.warning { color: #795314; background: var(--warning-bg); border-color: #f0d9a5; }
+.notice.success { color: #255c42; background: var(--success-bg); border-color: #c5e5d1; }
+.notice.danger { color: #873043; background: var(--danger-bg); border-color: #efc6ce; }
+.notice ul { margin: 8px 0 0; padding-left: 21px; }
+.notice p:last-child { margin-bottom: 0; }
+.two-column { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  background: rgba(44, 20, 28, .42);
+  backdrop-filter: blur(3px);
+}
+.modal-backdrop.open { display: flex; }
+.modal {
+  width: min(640px, 100%);
+  max-height: min(92vh, 900px);
+  overflow: auto;
+  background: #fff;
+  border: 1px solid #e4cbd2;
+  border-radius: 16px;
+  box-shadow: 0 25px 80px rgba(40,14,24,.22);
+}
+.modal.modal-wide { width: min(900px, 100%); }
+.modal-header {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 20px 22px 15px;
+  background: #fff;
+  border-bottom: 1px solid var(--line);
+}
+.modal-header h2 { margin-bottom: 3px; color: var(--wine-dark); font-family: Georgia, serif; font-size: 22px; font-weight: 500; }
+.modal-header p { margin-bottom: 0; color: var(--muted); font-size: 12px; }
+.modal-close {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  flex: 0 0 34px;
+  color: var(--wine);
+  background: #fff;
+  border: 1px solid var(--rose-border);
+  border-radius: 9px;
+  font-size: 20px;
+}
+.modal-body { padding: 20px 22px; }
+.modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 9px;
+  padding: 14px 22px 20px;
+  border-top: 1px solid var(--line);
+}
+.form-stack { display: grid; gap: 15px; }
+.preview-paper {
+  position: relative;
+  min-height: 430px;
+  padding: 52px 42px 46px;
+  color: #272125;
+  background: #fff;
+  border: 1px solid #eadce0;
+  box-shadow: 0 3px 14px rgba(50,20,30,.05);
+  font-family: Georgia, "Times New Roman", serif;
+}
+.preview-paper:before {
+  content: "";
+  position: absolute;
+  inset: 17px;
+  border: 1px solid #9a596b;
+  pointer-events: none;
+}
+.preview-paper:after {
+  content: "❧";
+  position: absolute;
+  top: 7px;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 0 10px;
+  color: #9a596b;
+  background: #fff;
+  font-size: 18px;
+}
+.preview-title {
+  position: relative;
+  margin: 0 0 25px;
+  text-align: center;
+  font-size: 23px;
+  font-weight: 700;
+  line-height: 1.3;
+  overflow-wrap: anywhere;
+}
+.preview-body { position: relative; font-size: 15px; line-height: 1.75; overflow-wrap: anywhere; }
+.preview-body p { margin: 0 0 12px; text-indent: 12.5mm; white-space: pre-wrap; }
+.preview-author { position: relative; margin-top: 28px; text-align: right; font-size: 13px; }
+.export-actions { display: flex; flex-wrap: wrap; gap: 9px; align-items: center; }
+.footer-note {
+  padding: 17px 0 0;
+  color: var(--muted);
+  text-align: center;
+  font-size: 11px;
+}
+.hidden { display: none !important; }
+.small-muted { color: var(--muted); font-size: 12px; }
+hr.soft { border: 0; border-top: 1px solid var(--line); margin: 17px 0; }
+@media (max-width: 700px) {
+  .topbar { padding: 12px 15px; }
+  .brand-mark { width: 38px; height: 38px; flex-basis: 38px; }
+  .brand-copy strong { font-size: 16px; }
+  .brand-copy span { font-size: 11px; }
+  main { width: min(100% - 22px, 1160px); margin-top: 18px; }
+  .hero { border-radius: 14px; }
+  .action-row { grid-template-columns: 1fr; }
+  .action-row > .btn { width: 100%; }
+  .record { align-items: flex-start; flex-direction: column; }
+  .record-actions { width: 100%; justify-content: flex-start; }
+  .two-column { grid-template-columns: 1fr; }
+  .section-heading { flex-direction: column; }
+  .modal-backdrop { padding: 8px; align-items: flex-end; }
+  .modal { max-height: 94vh; border-radius: 16px 16px 10px 10px; }
+  .modal-header, .modal-body { padding-left: 16px; padding-right: 16px; }
+  .modal-footer { padding-left: 16px; padding-right: 16px; }
+  .preview-paper { padding: 43px 28px 38px; }
+  .preview-paper:before { inset: 12px; }
+  .preview-title { font-size: 20px; }
+  .preview-body { font-size: 14px; }
+}
+@media print {
+  body { background: #fff; }
+}
+</style>
+</head>
+<body>
+<header class="topbar">
+  <div class="brand">
+    <div class="brand-mark" aria-hidden="true">T</div>
+    <div class="brand-copy">
+      <strong>Textos Escolares</strong>
+      <span>Organização de produções literárias</span>
+    </div>
+  </div>
+  <div class="header-actions">
+    <div class="menu-wrap">
+      <button class="icon-button" id="menuButton" aria-label="Abrir menu" aria-expanded="false" title="Menu">
+        <span class="hamburger" aria-hidden="true"><span></span><span></span><span></span></span>
+      </button>
+      <nav class="dropdown-menu" id="mainMenu" aria-label="Menu principal">
+        <button type="button" data-page="export-class"><span class="menu-symbol">▤</span><span>Exportar textos por turma</span></button>
+        <button type="button" data-page="export-student"><span class="menu-symbol">▧</span><span>Exportar textos por aluno</span></button>
+      </nav>
+    </div>
+  </div>
+</header>
+
+<main>
+  <section class="hero">
+    <p class="eyebrow">Caderno literário digital</p>
+    <h1>Textos escolares, bem organizados.</h1>
+    <p>Cadastre turmas e alunos, guarde cada produção e prepare folhas literárias com moldura delicada, autoria correta e impressão em A4.</p>
+  </section>
+
+  <section class="section-card" id="mainActionCard">
+    <div class="section-heading">
+      <div>
+        <h2>Área de trabalho</h2>
+        <p>Escolha o que deseja fazer e carregue os dados correspondentes.</p>
+      </div>
+    </div>
+    <div class="action-row">
+      <div class="field">
+        <label for="actionSelect">Ação</label>
+        <select id="actionSelect">
+          <option value="classrooms">Cadastrar turma</option>
+          <option value="students">Cadastrar aluno</option>
+          <option value="texts">Lançar textos</option>
+        </select>
+      </div>
+      <button class="btn btn-primary" id="mainSearchButton" type="button">Buscar <span aria-hidden="true">→</span></button>
+    </div>
+    <div class="content-area" id="mainContent">
+      <div class="empty-state">
+        <span class="empty-symbol" aria-hidden="true">✦</span>
+        <strong>Seu espaço de trabalho está pronto</strong>
+        Selecione uma ação e clique em Buscar para começar.
+      </div>
+    </div>
+  </section>
+
+  <section class="section-card hidden" id="exportClassPage">
+    <div class="section-heading">
+      <div>
+        <h2>Exportar textos por turma</h2>
+        <p>Reúna em um único PDF os textos existentes, mantendo a ordem alfabética.</p>
+      </div>
+      <button class="btn btn-secondary btn-small" type="button" data-home>Voltar</button>
+    </div>
+    <div class="two-column">
+      <div class="field">
+        <label for="exportClassSelect">Turma</label>
+        <select id="exportClassSelect"></select>
+      </div>
+      <div class="field">
+        <label>&nbsp;</label>
+        <button class="btn btn-primary" id="exportClassButton" type="button">Exportar PDF</button>
+      </div>
+    </div>
+    <div id="exportClassFeedback" class="content-area"></div>
+  </section>
+
+  <section class="section-card hidden" id="exportStudentPage">
+    <div class="section-heading">
+      <div>
+        <h2>Exportar textos por aluno</h2>
+        <p>Consulte os alunos de uma turma e descarregue cada trabalho individualmente.</p>
+      </div>
+      <button class="btn btn-secondary btn-small" type="button" data-home>Voltar</button>
+    </div>
+    <div class="action-row">
+      <div class="field">
+        <label for="exportStudentClassSelect">Turma</label>
+        <select id="exportStudentClassSelect"></select>
+      </div>
+      <button class="btn btn-primary" id="exportStudentSearchButton" type="button">Buscar</button>
+    </div>
+    <div id="exportStudentResults" class="content-area"></div>
+  </section>
+
+  <div class="footer-note">Textos Escolares · Os dados ficam guardados neste navegador e neste dispositivo.</div>
+</main>
+
+<div class="modal-backdrop" id="modalBackdrop" role="presentation">
+  <section class="modal" id="modalPanel" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <header class="modal-header">
+      <div>
+        <h2 id="modalTitle">Janela</h2>
+        <p id="modalSubtitle"></p>
+      </div>
+      <button class="modal-close" id="modalClose" type="button" aria-label="Fechar">×</button>
+    </header>
+    <div class="modal-body" id="modalBody"></div>
+    <footer class="modal-footer" id="modalFooter"></footer>
+  </section>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js" referrerpolicy="no-referrer"></script>
 <script>
-(()=>{const KEY='textosPorTurma_v2';let db={turmas:[],alunos:[],textos:{}};const $=id=>document.getElementById(id);const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,7);const sort=(a,b)=>a.nome.localeCompare(b.nome,'pt-BR',{sensitivity:'base'});function save(){localStorage.setItem(KEY,JSON.stringify(db))}function load(){try{let d=JSON.parse(localStorage.getItem(KEY)||localStorage.getItem('textosPorTurma')||'{}');db={turmas:d.turmas||[],alunos:d.alunos||[],textos:d.textos||{}}}catch(e){}}function tname(id){return db.turmas.find(t=>t.id===id)?.nome||'Turma não encontrada'}function tsigla(id){return db.turmas.find(t=>t.id===id)?.folha||tname(id)}function options(sel=''){return '<option value="">Selecione a turma...</option>'+db.turmas.slice().sort((a,b)=>a.nome.localeCompare(b.nome,'pt-BR',{numeric:true})).map(t=>`<option value="${esc(t.id)}" ${t.id===sel?'selected':''}>${esc(t.nome)}</option>`).join('')}function modal(title,body){$('modalTitle').textContent=title;$('modalBody').innerHTML=body;$('backdrop').classList.add('open')}function close(){ $('backdrop').classList.remove('open') }$('close').onclick=close;$('backdrop').onclick=e=>{if(e.target===$('backdrop'))close()};document.addEventListener('keydown',e=>{if(e.key==='Escape')close()});function actions(id,kind,extra=''){return `<div class="actions"><button class="secondary">AÇÕES ▾</button><div class="menu"><button data-act="edit-${kind}" data-id="${esc(id)}">Editar ${kind==='aluno'?'aluno':'turma'}</button>${kind==='aluno'?`<button data-act="texto" data-id="${esc(id)}">Informar texto</button>${extra}`:`<button data-act="del-turma" data-id="${esc(id)}">Excluir turma</button>`}</div></div>`}
-function showTurmas(){let r=$('resultado'),arr=db.turmas.slice().sort((a,b)=>a.nome.localeCompare(b.nome,'pt-BR',{numeric:true}));r.innerHTML=`<div class="sectionhead"><h2>Turmas cadastradas</h2><button id="add">＋ Cadastrar turma</button></div>`+(arr.length?`<div class="list">${arr.map(t=>`<div class="item"><div><strong>${esc(t.nome)}</strong><small>${esc(t.ano)} · Nome na folha: <span class="badge">${esc(t.folha)}</span></small></div>${actions(t.id,'turma')}</div>`).join('')}</div>`:'<div class="empty">Ainda não há turmas cadastradas.</div>');$('add').onclick=()=>turmaForm();r.querySelectorAll('[data-act="edit-turma"]').forEach(b=>b.onclick=()=>turmaForm(b.dataset.id));r.querySelectorAll('[data-act="del-turma"]').forEach(b=>b.onclick=()=>{if(db.alunos.some(a=>a.turmaId===b.dataset.id)){alert('Esta turma possui alunos. Transfira ou exclua os alunos antes de excluir a turma.');return}if(confirm('Excluir esta turma?')){db.turmas=db.turmas.filter(t=>t.id!==b.dataset.id);save();showTurmas()}})}
-function turmaForm(id=''){let t=db.turmas.find(x=>x.id===id)||{nome:'',ano:'',folha:''};modal(id?'Editar turma':'Cadastrar turma',`<form id="form"><div class="field"><label>Nome da turma</label><input id="nome" required value="${esc(t.nome)}" placeholder="Ex.: 7º ANO - 702"></div><div class="field"><label>Ano escolar</label><input id="ano" required value="${esc(t.ano)}" placeholder="Ex.: 7º Ano"></div><div class="field"><label>Nome que aparecerá na folha do aluno</label><input id="folha" required value="${esc(t.folha)}" placeholder="Ex.: 702"><p class="hint">Será usado no final: “Autor: Nome do aluno - 702”.</p></div><div class="foot"><button type="button" class="secondary" id="cancel">Cancelar</button><button>Salvar turma</button></div></form>`);$('cancel').onclick=close;$('form').onsubmit=e=>{e.preventDefault();let d={nome:$('nome').value.trim().toLocaleUpperCase('pt-BR'),ano:$('ano').value.trim(),folha:$('folha').value.trim().toLocaleUpperCase('pt-BR')};if(id)Object.assign(db.turmas.find(x=>x.id===id),d);else db.turmas.push({id:uid(),...d});save();close();showTurmas()}}
-function showAlunos(filter=''){let r=$('resultado'),arr=db.alunos.filter(a=>!filter||a.turmaId===filter).slice().sort(sort);r.innerHTML=`<div class="sectionhead"><div><h2>Alunos cadastrados</h2><p class="hint">Em ordem alfabética pelo nome completo.</p></div><button id="add" ${db.turmas.length?'':'disabled'}>＋ Cadastrar aluno</button></div>`+(!db.turmas.length?'<div class="empty">Cadastre uma turma antes de cadastrar alunos.</div>':arr.length?`<div class="list">${arr.map(a=>`<div class="item"><div><strong>${esc(a.nome)}</strong><small>${esc(tname(a.turmaId))} · ${esc(a.genero==='F'?'Feminino':a.genero==='M'?'Masculino':'Prefiro não informar')}</small></div>${actions(a.id,'aluno')}</div>`).join('')}</div>`:'<div class="empty">Nenhum aluno encontrado.</div>');$('add').onclick=()=>alunoForm();r.querySelectorAll('[data-act="edit-aluno"]').forEach(b=>b.onclick=()=>alunoForm(b.dataset.id));r.querySelectorAll('[data-act="texto"]').forEach(b=>b.onclick=()=>textoForm(b.dataset.id));r.querySelectorAll('[data-act="del-aluno"]').forEach(b=>b.onclick=()=>delAluno(b.dataset.id))}
-function alunoForm(id=''){if(!db.turmas.length){alert('Cadastre uma turma primeiro.');return}let a=db.alunos.find(x=>x.id===id)||{nome:'',turmaId:'',genero:''};modal(id?'Editar aluno':'Cadastrar aluno',`<form id="form"><div class="field"><label>Nome completo do(a) aluno(a)</label><input id="nome" required value="${esc(a.nome)}" placeholder="Nome completo"></div><div class="field"><label>Turma</label><select id="turma" required>${options(a.turmaId)}</select></div><div class="field"><label>Género</label><select id="genero" required><option value="">Selecione...</option><option value="F" ${a.genero==='F'?'selected':''}>Feminino</option><option value="M" ${a.genero==='M'?'selected':''}>Masculino</option><option value="N" ${a.genero==='N'?'selected':''}>Prefiro não informar</option></select></div><div class="foot"><button type="button" class="secondary" id="cancel">Cancelar</button><button>Salvar aluno</button></div></form>`);$('cancel').onclick=close;$('form').onsubmit=e=>{e.preventDefault();let d={nome:$('nome').value.trim().replace(/\s+/g,' '),turmaId:$('turma').value,genero:$('genero').value};if(id)Object.assign(db.alunos.find(x=>x.id===id),d);else db.alunos.push({id:uid(),...d});save();close();showAlunos()}}
-function delAluno(id){let a=db.alunos.find(x=>x.id===id);if(a&&confirm('Excluir o cadastro de '+a.nome+'?')){db.alunos=db.alunos.filter(x=>x.id!==id);save();showAlunos()}}
-function textoForm(id=''){if(!db.alunos.length){alert('Cadastre pelo menos um aluno primeiro.');return}let a=db.alunos.find(x=>x.id===id),old=a?(db.textos[a.id]||{}):{};modal('Informar texto',`<form id="form">${a?`<p><span class="badge">${esc(a.nome)}</span> <span class="badge">${esc(tsigla(a.turmaId))}</span></p>`:`<div class="field"><label>Aluno</label><select id="aluno" required><option value="">Selecione o aluno...</option>${db.alunos.slice().sort(sort).map(x=>`<option value="${esc(x.id)}">${esc(x.nome)} — ${esc(tsigla(x.turmaId))}</option>`).join('')}</select></div>`}<div class="field"><label>Título do texto</label><input id="titulo" required value="${esc(old.titulo||'')}" placeholder="Título do texto"></div><div class="field"><label>Texto</label><textarea id="conteudo" required placeholder="Digite ou cole o texto do aluno...">${esc(old.conteudo||'')}</textarea></div><div class="foot"><button type="button" class="secondary" id="cancel">Cancelar</button><button>Salvar texto</button></div></form>`);$('cancel').onclick=close;$('form').onsubmit=e=>{e.preventDefault();let aid=a?a.id:$('aluno').value;if(!aid)return;db.textos[aid]={titulo:$('titulo').value.trim(),conteudo:$('conteudo').value.trim()};save();close();if($('acao').value==='textos')showTextos();else showAlunos()}}
-function showTextos(){let r=$('resultado');r.innerHTML=`<div class="sectionhead"><h2>Lançar textos</h2></div><div class="bar"><div><label for="filtro">Turma:</label><select id="filtro">${options()}</select></div><button id="buscarTurma" ${db.turmas.length?'':'disabled'}>Buscar</button></div><p class="hint">Selecione uma turma e clique em Buscar para ver os alunos em ordem alfabética.</p><div id="daTurma" class="section"></div>`;$('buscarTurma').onclick=()=>{let id=$('filtro').value;if(!id){$('daTurma').innerHTML='<div class="empty">Selecione uma turma antes de buscar.</div>';return}renderStudents(id)};if(!db.turmas.length)$('daTurma').innerHTML='<div class="empty">Cadastre uma turma para começar.</div>'}
-function renderStudents(tid){let target=$('daTurma'),arr=db.alunos.filter(a=>a.turmaId===tid).slice().sort(sort);target.innerHTML=arr.length?`<div class="list">${arr.map(a=>{let t=db.textos[a.id];return `<div class="item"><div><strong>${esc(a.nome)}</strong><small>${t?`Texto: ${esc(t.titulo)} · <span class="badge">Salvo</span>`:'Nenhum texto informado'}</small></div><div class="actions"><button>AÇÕES ▾</button><div class="menu"><button data-act="edit-aluno" data-id="${esc(a.id)}">Editar aluno</button><button data-act="texto" data-id="${esc(a.id)}">Informar texto</button><button data-act="preview" data-id="${esc(a.id)}">Pré-visualizar texto</button></div></div></div>`}).join('')}</div>`:'<div class="empty">Não há alunos cadastrados nesta turma.</div>';target.querySelectorAll('[data-act="edit-aluno"]').forEach(b=>b.onclick=()=>alunoForm(b.dataset.id));target.querySelectorAll('[data-act="texto"]').forEach(b=>b.onclick=()=>textoForm(b.dataset.id));target.querySelectorAll('[data-act="preview"]').forEach(b=>b.onclick=()=>preview(b.dataset.id))}
-function preview(id){let a=db.alunos.find(x=>x.id===id),t=db.textos[id];if(!a||!t){alert('Este aluno ainda não tem texto salvo.');return}let author=a.genero==='F'?'Autora':'Autor';modal('Pré-visualização do texto',`<article style="font-family:Georgia,serif;line-height:1.6;padding:6px"><h2 style="text-align:center;margin-bottom:25px">${esc(t.titulo)}</h2><div style="white-space:pre-wrap">${esc(t.conteudo)}</div><p style="text-align:right;margin-top:28px">${author}: ${esc(a.nome)} - ${esc(tsigla(a.turmaId))}</p></article><div class="foot"><button class="secondary" id="cancel">Fechar</button><button id="print">Imprimir / guardar em PDF</button></div>`);$('cancel').onclick=close;$('print').onclick=()=>{let w=window.open('','_blank');if(!w){alert('Permita pop-ups para abrir a impressão.');return}w.document.write(`<!doctype html><html><head><meta charset="utf-8"><title>${esc(t.titulo)}</title><style>@page{size:A4;margin:2.3cm}body{font-family:Georgia,serif;font-size:12pt;line-height:1.55;color:#222}h1{text-align:center;font-size:18pt;margin:0 0 28px}.content{white-space:pre-wrap}.author{text-align:right;margin-top:30px;font-size:11pt}</style></head><body><h1>${esc(t.titulo)}</h1><div class="content">${esc(t.conteudo)}</div><p class="author">${author}: ${esc(a.nome)} - ${esc(tsigla(a.turmaId))}</p><script>window.onload=()=>window.print();<\/script></body></html>`);w.document.close()}}
-$('buscar').onclick=()=>{let a=$('acao').value;if(a==='turmas')showTurmas();else if(a==='alunos')showAlunos();else if(a==='textos')showTextos();else $('resultado').innerHTML='<div class="empty">Selecione uma ação na lista suspensa.</div>'};load();
-})();
-</script></body></html>
+"use strict";
+
+/* ============================================================
+   TEXTOS ESCOLARES — armazenamento e estado da aplicação
+   ============================================================ */
+const STORAGE_KEY = "textosEscolares.v1";
+const state = {
+  classrooms: [],
+  students: [],
+  activePage: "home",
+  lastAction: "classrooms",
+  selectedClassForTexts: "",
+  modalSaveHandler: null,
+  modalPreviousFocus: null
+};
+
+const $ = (selector, root = document) => root.querySelector(selector);
+const $$ = (selector, root = document) => Array.from(root.querySelectorAll(selector));
+
+function makeId(prefix) {
+  return prefix + "_" + Date.now().toString(36) + "_" + Math.random().toString(36).slice(2, 9);
+}
+
+function normalizeName(value) {
+  return String(value || "").trim().replace(/\s+/g, " ");
+}
+
+function upperName(value) {
+  return normalizeName(value).toLocaleUpperCase("pt-BR");
+}
+
+function escapeHTML(value) {
+  return String(value ?? "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
+function titleCaseName(value) {
+  const particles = new Set(["da", "de", "do", "das", "dos", "e"]);
+  return normalizeName(value).toLocaleLowerCase("pt-BR").split(" ").map((part, index) => {
+    if (index > 0 && particles.has(part)) return part;
+    return part.split("-").map(piece => piece ? piece.charAt(0).toLocaleUpperCase("pt-BR") + piece.slice(1) : piece).join("-");
+  }).join(" ");
+}
+
+function getClassroom(id) {
+  return state.classrooms.find(item => item.id === id) || null;
+}
+
+function getStudent(id) {
+  return state.students.find(item => item.id === id) || null;
+}
+
+function getStudentsForClass(classId) {
+  return state.students
+    .filter(student => student.classroomId === classId)
+    .sort((a, b) => upperName(a.name).localeCompare(upperName(b.name), "pt-BR"));
+}
+
+function studentHasText(student) {
+  return Boolean(student && normalizeName(student.textTitle) && String(student.textBody || "").trim());
+}
+
+function authorLabel(student) {
+  if (student.gender === "Feminino") return "Autora:";
+  if (student.gender === "Masculino") return "Autor:";
+  return "Autor(a):";
+}
+
+function authorLine(student) {
+  const classroom = getClassroom(student.classroomId);
+  const shortName = classroom ? classroom.sheetName : "";
+  return `${authorLabel(student)} ${titleCaseName(student.name)}${shortName ? " - " + shortName : ""}`;
+}
+
+function sortClassrooms() {
+  state.classrooms.sort((a, b) => {
+    const yearComparison = String(a.schoolYear || "").localeCompare(String(b.schoolYear || ""), "pt-BR", { numeric: true });
+    return yearComparison || String(a.name || "").localeCompare(String(b.name || ""), "pt-BR", { numeric: true });
+  });
+}
+
+function persistData() {
+  try {
+    const payload = {
+      version: 1,
+      classrooms: state.classrooms,
+      students: state.students
+    };
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
+    return true;
+  } catch (error) {
+    console.error("Não foi possível guardar os dados:", error);
+    showToast("Não foi possível guardar os dados. Verifique o espaço disponível no navegador.", "danger");
+    return false;
+  }
+}
+
+function loadData() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return;
+    const parsed = JSON.parse(raw);
+    if (!parsed || !Array.isArray(parsed.classrooms) || !Array.isArray(parsed.students)) {
+      throw new Error("Estrutura de dados inválida");
+    }
+    state.classrooms = parsed.classrooms.map(item => ({
+      id: String(item.id || makeId("class")),
+      name: normalizeName(item.name),
+      schoolYear: normalizeName(item.schoolYear),
+      sheetName: normalizeName(item.sheetName)
+    }));
+    state.students = parsed.students.map(item => ({
+      id: String(item.id || makeId("student")),
+      name: normalizeName(item.name),
+      classroomId: String(item.classroomId || ""),
+      gender: ["Feminino", "Masculino", "Prefiro não informar"].includes(item.gender) ? item.gender : "Prefiro não informar",
+      textTitle: String(item.textTitle || ""),
+      textBody: String(item.textBody || "")
+    }));
+    sortClassrooms();
+  } catch (error) {
+    console.error("Os dados locais não puderam ser lidos:", error);
+    alert("Os dados guardados neste navegador parecem estar danificados. Para evitar perda, eles não foram apagados automaticamente. Faça uma cópia do armazenamento antes de tentar recuperá-los.");
+  }
+}
+
+/* ============================================================
+   Notificações e modal acessível
+   ============================================================ */
+function showToast(message, type = "success") {
+  let region = $("#toastRegion");
+  if (!region) {
+    region = document.createElement("div");
+    region.id = "toastRegion";
+    region.setAttribute("aria-live", "polite");
+    region.style.cssText = "position:fixed;right:16px;bottom:16px;z-index:200;display:grid;gap:8px;width:min(380px,calc(100vw - 32px));";
+    document.body.appendChild(region);
+  }
+  const item = document.createElement("div");
+  item.className = `notice ${type}`;
+  item.style.cssText = "margin:0;box-shadow:0 8px 25px rgba(50,20,30,.12);";
+  item.textContent = message;
+  region.appendChild(item);
+  window.setTimeout(() => item.remove(), 4200);
+}
+
+function openModal({ title, subtitle = "", body = "", buttons = [], wide = false, onSave = null }) {
+  state.modalPreviousFocus = document.activeElement;
+  $("#modalTitle").textContent = title;
+  $("#modalSubtitle").textContent = subtitle;
+  $("#modalBody").innerHTML = body;
+  $("#modalPanel").classList.toggle("modal-wide", Boolean(wide));
+  $("#modalFooter").innerHTML = "";
+  state.modalSaveHandler = onSave;
+
+  buttons.forEach(button => {
+    const element = document.createElement("button");
+    element.type = "button";
+    element.className = button.className || "btn btn-secondary";
+    element.textContent = button.label;
+    element.addEventListener("click", () => {
+      if (typeof button.action === "function") button.action();
+    });
+    $("#modalFooter").appendChild(element);
+  });
+
+  $("#modalBackdrop").classList.add("open");
+  document.body.style.overflow = "hidden";
+  const firstInput = $("#modalBody input, #modalBody select, #modalBody textarea, #modalBody button");
+  if (firstInput) window.setTimeout(() => firstInput.focus(), 20);
+}
+
+function closeModal() {
+  $("#modalBackdrop").classList.remove("open");
+  document.body.style.overflow = "";
+  $("#modalBody").innerHTML = "";
+  $("#modalFooter").innerHTML = "";
+  state.modalSaveHandler = null;
+  if (state.modalPreviousFocus && typeof state.modalPreviousFocus.focus === "function") state.modalPreviousFocus.focus();
+}
+
+function closeMenu() {
+  $("#mainMenu").classList.remove("open");
+  $("#menuButton").setAttribute("aria-expanded", "false");
+}
+
+function showPage(page) {
+  state.activePage = page;
+  $("#mainActionCard").classList.toggle("hidden", page !== "home");
+  $("#exportClassPage").classList.toggle("hidden", page !== "export-class");
+  $("#exportStudentPage").classList.toggle("hidden", page !== "export-student");
+  closeMenu();
+  if (page === "export-class") {
+    refreshClassroomSelect($("#exportClassSelect"), "Selecione uma turma");
+    $("#exportClassFeedback").innerHTML = "";
+  }
+  if (page === "export-student") {
+    refreshClassroomSelect($("#exportStudentClassSelect"), "Selecione uma turma");
+    $("#exportStudentResults").innerHTML = "";
+  }
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+/* ============================================================
+   Selects e pequenos componentes de interface
+   ============================================================ */
+function refreshClassroomSelect(select, placeholder, selectedValue = "") {
+  if (!select) return;
+  const current = selectedValue || select.value;
+  select.innerHTML = "";
+  const option = document.createElement("option");
+  option.value = "";
+  option.textContent = placeholder;
+  select.appendChild(option);
+  state.classrooms.forEach(classroom => {
+    const item = document.createElement("option");
+    item.value = classroom.id;
+    item.textContent = `${classroom.name} — ${classroom.schoolYear}`;
+    select.appendChild(item);
+  });
+  if (state.classrooms.some(item => item.id === current)) select.value = current;
+}
+
+function emptyState(title, message, symbol = "✦") {
+  return `<div class="empty-state"><span class="empty-symbol" aria-hidden="true">${symbol}</span><strong>${escapeHTML(title)}</strong>${escapeHTML(message)}</div>`;
+}
+
+function statusMarkup(student) {
+  return studentHasText(student)
+    ? '<span class="status done">● Texto informado</span>'
+    : '<span class="status pending">● Texto pendente</span>';
+}
+
+function renderClassroomOptions(selectedId = "") {
+  return state.classrooms.map(classroom =>
+    `<option value="${escapeHTML(classroom.id)}" ${classroom.id === selectedId ? "selected" : ""}>${escapeHTML(classroom.name)} — ${escapeHTML(classroom.schoolYear)}</option>`
+  ).join("");
+}
+
+/* ============================================================
+   Página principal: escolher ação e buscar
+   ============================================================ */
+function handleMainSearch() {
+  const action = $("#actionSelect").value;
+  state.lastAction = action;
+  if (action === "classrooms") renderClassrooms();
+  if (action === "students") renderStudents();
+  if (action === "texts") renderTextLaunch();
+}
+
+function renderClassrooms() {
+  const content = $("#mainContent");
+  const sorted = [...state.classrooms].sort((a, b) =>
+    String(a.schoolYear).localeCompare(String(b.schoolYear), "pt-BR", { numeric: true }) ||
+    String(a.name).localeCompare(String(b.name), "pt-BR", { numeric: true })
+  );
+  content.innerHTML = `
+    <div class="list-toolbar">
+      <span class="count">${sorted.length} turma(s) cadastrada(s)</span>
+      <button class="btn btn-primary" id="addClassroomButton" type="button">＋ Cadastrar turma</button>
+    </div>
+    <div class="records" id="classroomRecords">
+      ${sorted.length ? sorted.map(classroom => `
+        <article class="record">
+          <div class="record-main">
+            <span class="record-title">${escapeHTML(classroom.name)}</span>
+            <div class="record-meta"><span>Ano escolar: ${escapeHTML(classroom.schoolYear)}</span><span>Identificação na folha: ${escapeHTML(classroom.sheetName)}</span><span>${getStudentsForClass(classroom.id).length} aluno(s)</span></div>
+          </div>
+          <div class="record-actions">
+            <button class="btn btn-secondary btn-small" type="button" data-edit-class="${escapeHTML(classroom.id)}">Editar</button>
+            <button class="btn btn-danger btn-small" type="button" data-delete-class="${escapeHTML(classroom.id)}">Excluir</button>
+          </div>
+        </article>`).join("") : emptyState("Nenhuma turma cadastrada", "Cadastre a primeira turma para começar.", "▤")}
+    </div>`;
+  $("#addClassroomButton").addEventListener("click", () => openClassroomModal());
+  $$("[data-edit-class]", content).forEach(button => button.addEventListener("click", () => openClassroomModal(button.dataset.editClass)));
+  $$("[data-delete-class]", content).forEach(button => button.addEventListener("click", () => deleteClassroom(button.dataset.deleteClass)));
+}
+
+function openClassroomModal(classroomId = "") {
+  const classroom = classroomId ? getClassroom(classroomId) : null;
+  const isEditing = Boolean(classroom);
+  const body = `
+    <form class="form-stack" id="classroomForm">
+      <div class="field">
+        <label for="className">Nome da turma *</label>
+        <input id="className" name="className" maxlength="100" required value="${escapeHTML(classroom?.name || "")}" placeholder="Ex.: 7º ANO - 702">
+      </div>
+      <div class="field">
+        <label for="schoolYear">Ano escolar *</label>
+        <input id="schoolYear" name="schoolYear" maxlength="40" required value="${escapeHTML(classroom?.schoolYear || "")}" placeholder="Ex.: 7º Ano">
+      </div>
+      <div class="field">
+        <label for="sheetName">Nome que aparecerá na folha *</label>
+        <input id="sheetName" name="sheetName" maxlength="40" required value="${escapeHTML(classroom?.sheetName || "")}" placeholder="Ex.: 702">
+        <span class="helper">Este nome abreviado será utilizado na linha de autoria do PDF.</span>
+      </div>
+    </form>`;
+  openModal({
+    title: isEditing ? "Editar turma" : "Cadastrar turma",
+    subtitle: "Preencha os dados de identificação da turma.",
+    body,
+    buttons: [
+      { label: "Cancelar", className: "btn btn-secondary", action: closeModal },
+      { label: "Salvar turma", className: "btn btn-primary", action: () => saveClassroom(classroomId) }
+    ]
+  });
+  $("#classroomForm").addEventListener("submit", event => {
+    event.preventDefault();
+    saveClassroom(classroomId);
+  });
+}
+
+function saveClassroom(classroomId) {
+  const form = $("#classroomForm");
+  if (!form.reportValidity()) return;
+  const name = normalizeName($("#className").value);
+  const schoolYear = normalizeName($("#schoolYear").value);
+  const sheetName = normalizeName($("#sheetName").value);
+  const duplicate = state.classrooms.find(item => item.id !== classroomId && upperName(item.name) === upperName(name));
+  if (duplicate) {
+    showToast("Já existe uma turma com esse nome.", "danger");
+    return;
+  }
+  if (classroomId) {
+    const classroom = getClassroom(classroomId);
+    if (!classroom) return;
+    Object.assign(classroom, { name, schoolYear, sheetName });
+  } else {
+    state.classrooms.push({ id: makeId("class"), name, schoolYear, sheetName });
+  }
+  sortClassrooms();
+  persistData();
+  closeModal();
+  renderClassrooms();
+  refreshAllClassroomSelects();
+  showToast(classroomId ? "Turma atualizada." : "Turma cadastrada.");
+}
+
+function deleteClassroom(classroomId) {
+  const classroom = getClassroom(classroomId);
+  if (!classroom) return;
+  const linked = getStudentsForClass(classroomId);
+  if (linked.length) {
+    openModal({
+      title: "Turma possui alunos",
+      subtitle: "Para evitar a perda de vínculos, a exclusão foi bloqueada.",
+      body: `<div class="notice warning"><strong>${escapeHTML(classroom.name)}</strong> possui ${linked.length} aluno(s) vinculado(s). Transfira ou exclua os alunos antes de excluir esta turma.</div>`,
+      buttons: [{ label: "Entendi", className: "btn btn-primary", action: closeModal }]
+    });
+    return;
+  }
+  if (!confirm(`Excluir a turma "${classroom.name}"? Esta ação não pode ser desfeita.`)) return;
+  state.classrooms = state.classrooms.filter(item => item.id !== classroomId);
+  persistData();
+  renderClassrooms();
+  refreshAllClassroomSelects();
+  showToast("Turma excluída.");
+}
+
+/* ============================================================
+   Cadastro de alunos
+   ============================================================ */
+function renderStudents() {
+  const content = $("#mainContent");
+  const sorted = [...state.students].sort((a, b) => upperName(a.name).localeCompare(upperName(b.name), "pt-BR"));
+  content.innerHTML = `
+    <div class="list-toolbar">
+      <span class="count">${sorted.length} aluno(s) cadastrado(s)</span>
+      <button class="btn btn-primary" id="addStudentButton" type="button">＋ Cadastrar aluno</button>
+    </div>
+    ${!state.classrooms.length ? `<div class="notice warning">Cadastre uma turma antes de cadastrar alunos.</div>` : ""}
+    <div class="records">
+      ${sorted.length ? sorted.map(student => {
+        const classroom = getClassroom(student.classroomId);
+        return `<article class="record">
+          <div class="record-main">
+            <span class="record-title">${escapeHTML(upperName(student.name))}</span>
+            <div class="record-meta"><span>Turma: ${escapeHTML(classroom?.name || "Turma não encontrada")}</span><span>${escapeHTML(student.gender)}</span></div>
+          </div>
+          <div class="record-actions">
+            ${statusMarkup(student)}
+            <button class="btn btn-secondary btn-small" type="button" data-edit-student="${escapeHTML(student.id)}">Editar</button>
+            <button class="btn btn-danger btn-small" type="button" data-delete-student="${escapeHTML(student.id)}">Excluir</button>
+          </div>
+        </article>`;
+      }).join("") : emptyState("Nenhum aluno cadastrado", "Cadastre um aluno depois de criar uma turma.", "♧")}
+    </div>`;
+  $("#addStudentButton").addEventListener("click", () => openStudentModal());
+  $("#addStudentButton").disabled = state.classrooms.length === 0;
+  $$("[data-edit-student]", content).forEach(button => button.addEventListener("click", () => openStudentModal(button.dataset.editStudent)));
+  $$("[data-delete-student]", content).forEach(button => button.addEventListener("click", () => deleteStudent(button.dataset.deleteStudent)));
+}
+
+function openStudentModal(studentId = "") {
+  if (!state.classrooms.length) {
+    showToast("Cadastre uma turma antes de cadastrar alunos.", "warning");
+    return;
+  }
+  const student = studentId ? getStudent(studentId) : null;
+  const isEditing = Boolean(student);
+  const body = `
+    <form class="form-stack" id="studentForm">
+      <div class="field">
+        <label for="studentName">Nome completo do(a) aluno(a) *</label>
+        <input id="studentName" name="studentName" maxlength="160" required autocomplete="name" value="${escapeHTML(student?.name || "")}" placeholder="Digite o nome completo">
+        <span class="helper">O nome será exibido em maiúsculas nas áreas administrativas.</span>
+      </div>
+      <div class="field">
+        <label for="studentClass">Turma *</label>
+        <select id="studentClass" name="studentClass" required>
+          <option value="">Selecione uma turma</option>
+          ${renderClassroomOptions(student?.classroomId || "")}
+        </select>
+      </div>
+      <div class="field">
+        <label for="studentGender">Género *</label>
+        <select id="studentGender" name="studentGender" required>
+          <option value="Feminino" ${student?.gender === "Feminino" ? "selected" : ""}>Feminino</option>
+          <option value="Masculino" ${student?.gender === "Masculino" ? "selected" : ""}>Masculino</option>
+          <option value="Prefiro não informar" ${!student || student?.gender === "Prefiro não informar" ? "selected" : ""}>Prefiro não informar</option>
+        </select>
+      </div>
+    </form>`;
+  openModal({
+    title: isEditing ? "Editar aluno" : "Cadastrar aluno",
+    subtitle: "Os dados poderão ser alterados posteriormente.",
+    body,
+    buttons: [
+      { label: "Cancelar", className: "btn btn-secondary", action: closeModal },
+      { label: "Salvar aluno", className: "btn btn-primary", action: () => saveStudent(studentId) }
+    ]
+  });
+  $("#studentForm").addEventListener("submit", event => {
+    event.preventDefault();
+    saveStudent(studentId);
+  });
+}
+
+function saveStudent(studentId) {
+  const form = $("#studentForm");
+  if (!form.reportValidity()) return;
+  const name = normalizeName($("#studentName").value);
+  const classroomId = $("#studentClass").value;
+  const gender = $("#studentGender").value;
+  if (!getClassroom(classroomId)) {
+    showToast("Selecione uma turma válida.", "danger");
+    return;
+  }
+  const duplicate = state.students.find(item => item.id !== studentId && item.classroomId === classroomId && upperName(item.name) === upperName(name));
+  if (duplicate) {
+    showToast("Já existe um aluno com esse nome nesta turma.", "danger");
+    return;
+  }
+  if (studentId) {
+    const student = getStudent(studentId);
+    if (!student) return;
+    Object.assign(student, { name, classroomId, gender });
+  } else {
+    state.students.push({
+      id: makeId("student"),
+      name,
+      classroomId,
+      gender,
+      textTitle: "",
+      textBody: ""
+    });
+  }
+  persistData();
+  closeModal();
+  renderStudents();
+  refreshAllClassroomSelects();
+  showToast(studentId ? "Dados do aluno atualizados." : "Aluno cadastrado.");
+}
+
+function deleteStudent(studentId) {
+  const student = getStudent(studentId);
+  if (!student) return;
+  if (!confirm(`Excluir o aluno "${upperName(student.name)}" e o texto associado? Esta ação não pode ser desfeita.`)) return;
+  state.students = state.students.filter(item => item.id !== studentId);
+  persistData();
+  renderStudents();
+  refreshAllClassroomSelects();
+  showToast("Aluno excluído.");
+}
+
+/* ============================================================
+   Lançamento e gestão de textos por turma
+   ============================================================ */
+function renderTextLaunch() {
+  const content = $("#mainContent");
+  content.innerHTML = `
+    <div class="two-column">
+      <div class="field">
+        <label for="textClassSelect">Turma</label>
+        <select id="textClassSelect"><option value="">Selecione uma turma</option>${renderClassroomOptions(state.selectedClassForTexts)}</select>
+      </div>
+      <div class="field">
+        <label>&nbsp;</label>
+        <button class="btn btn-primary" id="textClassSearchButton" type="button">Buscar alunos</button>
+      </div>
+    </div>
+    <div id="textClassResults" class="content-area">
+      ${state.classrooms.length ? emptyState("Selecione uma turma", "Escolha a turma e clique em Buscar alunos.", "▤") : emptyState("Cadastre uma turma primeiro", "Depois, cadastre alunos para começar a lançar textos.", "▤")}
+    </div>`;
+  $("#textClassSearchButton").addEventListener("click", () => {
+    const classId = $("#textClassSelect").value;
+    state.selectedClassForTexts = classId;
+    if (!classId) {
+      $("#textClassResults").innerHTML = `<div class="notice warning">Selecione uma turma antes de buscar.</div>`;
+      return;
+    }
+    renderTextStudents(classId);
+  });
+  if (state.selectedClassForTexts && getClassroom(state.selectedClassForTexts)) renderTextStudents(state.selectedClassForTexts);
+}
+
+function renderTextStudents(classId) {
+  const results = $("#textClassResults");
+  if (!results) return;
+  const classroom = getClassroom(classId);
+  const students = getStudentsForClass(classId);
+  results.innerHTML = `
+    <div class="list-toolbar">
+      <span class="count">${students.length} aluno(s) · ${escapeHTML(classroom?.name || "")}</span>
+      <span class="small-muted">Ordem alfabética</span>
+    </div>
+    <div class="records">
+      ${students.length ? students.map(student => `
+        <article class="record">
+          <div class="record-main">
+            <span class="record-title">${escapeHTML(upperName(student.name))}</span>
+            <div class="record-meta"><span>${escapeHTML(classroom?.name || "")}</span>${statusMarkup(student)}${studentHasText(student) ? `<span>Título: ${escapeHTML(student.textTitle)}</span>` : ""}</div>
+          </div>
+          <div class="record-actions">
+            <div class="actions-holder">
+              <button class="btn btn-secondary btn-small" type="button" data-actions-toggle="${escapeHTML(student.id)}" aria-expanded="false">AÇÕES ▾</button>
+              <div class="actions-menu" data-actions-menu="${escapeHTML(student.id)}">
+                <button type="button" data-action-edit="${escapeHTML(student.id)}">Editar aluno</button>
+                <button type="button" data-action-text="${escapeHTML(student.id)}">Informar texto</button>
+                <button type="button" data-action-preview="${escapeHTML(student.id)}">Pré-visualizar texto</button>
+              </div>
+            </div>
+          </div>
+        </article>`).join("") : emptyState("Nenhum aluno nesta turma", "Cadastre alunos ou escolha outra turma.", "♧")}
+    </div>`;
+  $$("[data-actions-toggle]", results).forEach(button => {
+    button.addEventListener("click", event => {
+      event.stopPropagation();
+      const id = button.dataset.actionsToggle;
+      const menu = $(`[data-actions-menu="${CSS.escape(id)}"]`, results);
+      const wasOpen = menu.classList.contains("open");
+      $$("[data-actions-menu]", results).forEach(item => item.classList.remove("open"));
+      $$("[data-actions-toggle]", results).forEach(item => item.setAttribute("aria-expanded", "false"));
+      if (!wasOpen) {
+        menu.classList.add("open");
+        button.setAttribute("aria-expanded", "true");
+      }
+    });
+    button.addEventListener("mouseenter", () => {
+      if (window.matchMedia("(hover: hover) and (pointer: fine)").matches) {
+        const menu = $(`[data-actions-menu="${CSS.escape(button.dataset.actionsToggle)}"]`, results);
+        menu.classList.add("open");
+        button.setAttribute("aria-expanded", "true");
+      }
+    });
+  });
+  $$("[data-action-edit]", results).forEach(button => button.addEventListener("click", () => {
+    closeAllActionMenus();
+    openStudentModal(button.dataset.actionEdit);
+  }));
+  $$("[data-action-text]", results).forEach(button => button.addEventListener("click", () => {
+    closeAllActionMenus();
+    openTextModal(button.dataset.actionText);
+  }));
+  $$("[data-action-preview]", results).forEach(button => button.addEventListener("click", () => {
+    closeAllActionMenus();
+    previewStudentText(button.dataset.actionPreview);
+  }));
+}
+
+function closeAllActionMenus() {
+  $$(".actions-menu").forEach(menu => menu.classList.remove("open"));
+  $$("[data-actions-toggle]").forEach(button => button.setAttribute("aria-expanded", "false"));
+}
+
+function openTextModal(studentId) {
+  const student = getStudent(studentId);
+  if (!student) return;
+  const body = `
+    <form class="form-stack" id="textForm">
+      <div class="field">
+        <label for="textTitle">Título do texto *</label>
+        <input id="textTitle" maxlength="220" required value="${escapeHTML(student.textTitle)}" placeholder="Digite o título da produção">
+      </div>
+      <div class="field">
+        <label for="textBody">Texto propriamente dito *</label>
+        <textarea id="textBody" required spellcheck="true" placeholder="Cole ou escreva o texto completo aqui...">${escapeHTML(student.textBody)}</textarea>
+        <span class="helper">Os parágrafos separados por linhas em branco serão preservados. A primeira linha de cada parágrafo terá recuo de 1,25 cm no PDF.</span>
+      </div>
+    </form>`;
+  openModal({
+    title: studentHasText(student) ? "Editar texto" : "Informar texto",
+    subtitle: upperName(student.name),
+    body,
+    wide: true,
+    buttons: [
+      { label: "Cancelar", className: "btn btn-secondary", action: closeModal },
+      { label: "Salvar texto", className: "btn btn-primary", action: () => saveStudentText(studentId) }
+    ]
+  });
+  $("#textForm").addEventListener("submit", event => {
+    event.preventDefault();
+    saveStudentText(studentId);
+  });
+}
+
+function saveStudentText(studentId) {
+  const form = $("#textForm");
+  if (!form.reportValidity()) return;
+  const student = getStudent(studentId);
+  if (!student) return;
+  const title = normalizeName($("#textTitle").value);
+  const body = $("#textBody").value.replace(/\r\n?/g, "\n").trim();
+  if (!title || !body) {
+    showToast("Informe o título e o conteúdo do texto.", "danger");
+    return;
+  }
+  student.textTitle = title;
+  student.textBody = body;
+  persistData();
+  closeModal();
+  const results = $("#textClassResults");
+  if (results && state.selectedClassForTexts) renderTextStudents(state.selectedClassForTexts);
+  if (state.lastAction === "students" && state.activePage === "home") renderStudents();
+  showToast("Texto salvo com sucesso.");
+}
+
+function previewStudentText(studentId) {
+  const student = getStudent(studentId);
+  if (!student) return;
+  if (!studentHasText(student)) {
+    openModal({
+      title: "Texto ainda não informado",
+      subtitle: upperName(student.name),
+      body: `<div class="notice warning">Este aluno ainda não possui título e conteúdo de texto salvos.</div>`,
+      buttons: [{ label: "Fechar", className: "btn btn-primary", action: closeModal }]
+    });
+    return;
+  }
+  const paragraphs = splitParagraphs(student.textBody);
+  const body = `
+    <div class="preview-paper">
+      <h3 class="preview-title">${escapeHTML(student.textTitle)}</h3>
+      <div class="preview-body">${paragraphs.map(paragraph => `<p>${escapeHTML(paragraph)}</p>`).join("")}</div>
+      <div class="preview-author">${escapeHTML(authorLine(student))}</div>
+    </div>`;
+  openModal({
+    title: "Pré-visualização do texto",
+    subtitle: "Esta é uma representação da folha literária. O PDF final usa paginação A4.",
+    body,
+    wide: true,
+    buttons: [
+      { label: "Fechar", className: "btn btn-secondary", action: closeModal },
+      { label: "Baixar PDF", className: "btn btn-primary", action: () => {
+        closeModal();
+        downloadStudentPDF(student.id);
+      } }
+    ]
+  });
+}
+
+function splitParagraphs(text) {
+  return String(text || "").replace(/\r\n?/g, "\n").trim().split(/\n\s*\n/).map(part => part.trim()).filter(part => part.length > 0);
+}
+
+/* ============================================================
+   Exportação individual e por turma
+   ============================================================ */
+function renderExportClassFeedback(classId) {
+  const feedback = $("#exportClassFeedback");
+  const classroom = getClassroom(classId);
+  if (!classroom) {
+    feedback.innerHTML = `<div class="notice warning">Selecione uma turma válida.</div>`;
+    return;
+  }
+  const students = getStudentsForClass(classId);
+  const withText = students.filter(studentHasText);
+  const pending = students.filter(student => !studentHasText(student));
+  if (!withText.length) {
+    feedback.innerHTML = `<div class="notice warning"><strong>Não há conteúdo para exportar.</strong><p>Nenhum aluno desta turma possui título e conteúdo salvos.</p></div>`;
+    return;
+  }
+  if (pending.length) {
+    feedback.innerHTML = `
+      <div class="notice warning">
+        <strong>Atenção! Existem alunos sem texto informado nesta turma:</strong>
+        <ul>${pending.map(student => `<li>${escapeHTML(upperName(student.name))}</li>`).join("")}</ul>
+        <p>É possível continuar. Somente os textos existentes serão incluídos; não serão criadas páginas vazias.</p>
+      </div>
+      <div class="export-actions">
+        <button class="btn btn-primary" id="confirmClassExport" type="button">Continuar e exportar ${withText.length} texto(s)</button>
+      </div>`;
+    $("#confirmClassExport").addEventListener("click", () => generatePDF(withText, `${safeFilename(classroom.name)}_textos_escolares.pdf`));
+  } else {
+    feedback.innerHTML = `
+      <div class="notice success"><strong>Todos os alunos possuem texto.</strong><p>Não há textos pendentes nesta turma.</p></div>
+      <div class="export-actions"><button class="btn btn-primary" id="confirmClassExport" type="button">Exportar ${withText.length} texto(s) em PDF</button></div>`;
+    $("#confirmClassExport").addEventListener("click", () => generatePDF(withText, `${safeFilename(classroom.name)}_textos_escolares.pdf`));
+  }
+}
+
+function renderExportStudents(classId) {
+  const results = $("#exportStudentResults");
+  const classroom = getClassroom(classId);
+  if (!classroom) {
+    results.innerHTML = `<div class="notice warning">Selecione uma turma antes de buscar.</div>`;
+    return;
+  }
+  const students = getStudentsForClass(classId);
+  results.innerHTML = `
+    <div class="list-toolbar"><span class="count">${students.length} aluno(s) · ${escapeHTML(classroom.name)}</span><span class="small-muted">Ordem alfabética</span></div>
+    <div class="records">
+      ${students.length ? students.map(student => `
+        <article class="record">
+          <div class="record-main">
+            <span class="record-title">${escapeHTML(upperName(student.name))}</span>
+            <div class="record-meta">${statusMarkup(student)}${studentHasText(student) ? `<span>${escapeHTML(student.textTitle)}</span>` : ""}</div>
+          </div>
+          <div class="record-actions">
+            <button class="btn ${studentHasText(student) ? "btn-primary" : "btn-secondary"} btn-small" type="button" data-download-student="${escapeHTML(student.id)}" ${studentHasText(student) ? "" : "disabled"}>↓ Baixar PDF</button>
+          </div>
+        </article>`).join("") : emptyState("Nenhum aluno nesta turma", "Cadastre alunos para consultar os textos.", "♧")}
+    </div>`;
+  $$("[data-download-student]", results).forEach(button => button.addEventListener("click", () => {
+    const student = getStudent(button.dataset.downloadStudent);
+    if (!student || !studentHasText(student)) {
+      showToast("Este aluno ainda não possui texto para baixar.", "warning");
+      return;
+    }
+    downloadStudentPDF(student.id);
+  }));
+}
+
+function downloadStudentPDF(studentId) {
+  const student = getStudent(studentId);
+  if (!student || !studentHasText(student)) {
+    showToast("Este aluno ainda não possui texto completo para baixar.", "warning");
+    return;
+  }
+  const classroom = getClassroom(student.classroomId);
+  const filename = `${safeFilename(titleCaseName(student.name))}_${safeFilename(classroom?.sheetName || "texto")}.pdf`;
+  generatePDF([student], filename);
+}
+
+function safeFilename(value) {
+  return String(value || "textos")
+    .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-zA-Z0-9_-]+/g, "_")
+    .replace(/^_+|_+$/g, "")
+    .slice(0, 90) || "textos_escolares";
+}
+
+/* ============================================================
+   Gerador PDF A4 — moldura repetida, parágrafos e recuo de 12,5 mm
+   ============================================================ */
+function generatePDF(students, filename) {
+  if (!window.jspdf || !window.jspdf.jsPDF) {
+    openModal({
+      title: "Biblioteca de PDF indisponível",
+      subtitle: "Não foi possível carregar o gerador de PDF.",
+      body: `<div class="notice danger">Verifique sua conexão com a internet e recarregue a página. A biblioteca jsPDF é carregada por CDN; os dados locais não serão apagados.</div>`,
+      buttons: [{ label: "Fechar", className: "btn btn-primary", action: closeModal }]
+    });
+    return;
+  }
+  const validStudents = students.filter(studentHasText);
+  if (!validStudents.length) {
+    showToast("Não há textos completos para exportar.", "warning");
+    return;
+  }
+  try {
+    const { jsPDF } = window.jspdf;
+    const pdf = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4", compress: true });
+    const pageWidth = 210;
+    const pageHeight = 297;
+    const frame = { x: 12, y: 12, w: 186, h: 273 };
+    const content = { left: 27, right: 27, top: 34, bottom: 30 };
+    const maxWidth = pageWidth - content.left - content.right;
+    let isFirstStudent = true;
+
+    function drawFrame() {
+      pdf.setFillColor(255, 255, 255);
+      pdf.rect(0, 0, pageWidth, pageHeight, "F");
+      pdf.setDrawColor(139, 64, 85);
+      pdf.setLineWidth(0.35);
+      pdf.rect(frame.x, frame.y, frame.w, frame.h);
+      pdf.setDrawColor(198, 151, 164);
+      pdf.setLineWidth(0.2);
+      const corners = [
+        [frame.x, frame.y],
+        [frame.x + frame.w, frame.y],
+        [frame.x, frame.y + frame.h],
+        [frame.x + frame.w, frame.y + frame.h]
+      ];
+      corners.forEach(([x, y], index) => {
+        const sx = index === 1 || index === 3 ? -1 : 1;
+        const sy = index >= 2 ? -1 : 1;
+        pdf.line(x, y + sy * 5, x, y + sy * 1.7);
+        pdf.line(x + sx * 5, y, x + sx * 1.7, y);
+        pdf.circle(x + sx * 2.2, y + sy * 2.2, 0.55, "S");
+      });
+      pdf.setTextColor(139, 64, 85);
+      pdf.setFont("times", "normal");
+      pdf.setFontSize(10);
+      pdf.text("❧", pageWidth / 2, 20, { align: "center" });
+    }
+
+    function addPageWithFrame() {
+      pdf.addPage("a4", "portrait");
+      drawFrame();
+      return content.top;
+    }
+
+    function getLineHeight(fontSize, factor = 1.42) {
+      return fontSize * 0.3528 * factor;
+    }
+
+    function writeParagraph(paragraph, y, fontSize) {
+      pdf.setFont("times", "normal");
+      pdf.setFontSize(fontSize);
+      pdf.setTextColor(42, 35, 38);
+      const indent = 12.5; // Recuo exato de 1,25 cm (12,5 mm)
+      const firstLineWidth = Math.max(25, maxWidth - indent);
+      const firstLines = pdf.splitTextToSize(paragraph, firstLineWidth);
+      const continuationLines = [];
+      // A primeira linha é separada para aplicar o recuo; as linhas seguintes voltam à margem do corpo.
+      if (firstLines.length > 0) {
+        const firstLine = firstLines[0];
+        const remainingText = paragraph.slice(firstLine.length).trimStart();
+        const firstLineActualWidth = pdf.getTextWidth(firstLine);
+        if (remainingText) {
+          const rest = pdf.splitTextToSize(remainingText, maxWidth);
+          continuationLines.push(...rest);
+        }
+        const lineHeight = getLineHeight(fontSize, 1.48);
+        if (y + lineHeight > pageHeight - content.bottom) {
+          y = addPageWithFrame();
+          pdf.setFont("times", "normal");
+          pdf.setFontSize(fontSize);
+        }
+        pdf.text(firstLine, content.left + indent, y);
+        y += lineHeight;
+        for (const line of continuationLines) {
+          if (y + lineHeight > pageHeight - content.bottom) {
+            y = addPageWithFrame();
+            pdf.setFont("times", "normal");
+            pdf.setFontSize(fontSize);
+          }
+          pdf.text(line, content.left, y);
+          y += lineHeight;
+        }
+        return y + fontSize * 0.3528 * 0.55;
+      }
+      return y;
+    }
+
+    function writeStudent(student) {
+      let y = content.top;
+      let fontSize = 12.5;
+      drawFrame();
+
+      // Título: centralizado, com ajuste moderado caso seja comprido.
+      const title = student.textTitle;
+      let titleSize = 17;
+      pdf.setFont("times", "bold");
+      while (titleSize > 12 && pdf.getTextWidth(title) > maxWidth) {
+        titleSize -= 0.5;
+        pdf.setFontSize(titleSize);
+      }
+      pdf.setFont("times", "bold");
+      pdf.setFontSize(titleSize);
+      pdf.setTextColor(75, 28, 43);
+      const titleLines = pdf.splitTextToSize(title, maxWidth);
+      const titleLineHeight = getLineHeight(titleSize, 1.3);
+      titleLines.forEach((line, index) => {
+        if (y + titleLineHeight > pageHeight - content.bottom) y = addPageWithFrame();
+        pdf.text(line, pageWidth / 2, y, { align: "center" });
+        y += titleLineHeight;
+      });
+      y += 9;
+
+      const paragraphs = splitParagraphs(student.textBody);
+      // Separa os parágrafos originais por linhas em branco; não reescreve nem resume o conteúdo.
+      for (const paragraph of paragraphs) {
+        let currentSize = fontSize;
+        const estimatedLines = pdf.splitTextToSize(paragraph, maxWidth).length;
+        if (estimatedLines > 0 && estimatedLines < 4) currentSize = 13;
+        y = writeParagraph(paragraph, y, currentSize);
+      }
+
+      const author = authorLine(student);
+      const authorSize = 10.5;
+      const authorLines = pdf.splitTextToSize(author, maxWidth);
+      const authorHeight = authorLines.length * getLineHeight(authorSize, 1.4);
+      if (y + 12 + authorHeight > pageHeight - content.bottom) y = addPageWithFrame();
+      y += 8;
+      pdf.setFont("times", "italic");
+      pdf.setFontSize(authorSize);
+      pdf.setTextColor(75, 57, 63);
+      pdf.text(authorLines, pageWidth - content.right, y, { align: "right" });
+    }
+
+    validStudents.forEach((student, index) => {
+      if (index > 0) pdf.addPage("a4", "portrait");
+      writeStudent(student);
+    });
+    pdf.save(filename);
+    showToast(validStudents.length === 1 ? "PDF individual preparado para download." : `PDF preparado com ${validStudents.length} texto(s).`);
+  } catch (error) {
+    console.error("Erro ao gerar PDF:", error);
+    showToast("Ocorreu um erro ao gerar o PDF. Tente novamente.", "danger");
+  }
+}
+
+/* ============================================================
+   Atualização de listas e eventos globais
+   ============================================================ */
+function refreshAllClassroomSelects() {
+  refreshClassroomSelect($("#exportClassSelect"), "Selecione uma turma", $("#exportClassSelect").value);
+  refreshClassroomSelect($("#exportStudentClassSelect"), "Selecione uma turma", $("#exportStudentClassSelect").value);
+}
+
+$("#menuButton").addEventListener("click", event => {
+  event.stopPropagation();
+  const menu = $("#mainMenu");
+  const isOpen = menu.classList.toggle("open");
+  $("#menuButton").setAttribute("aria-expanded", String(isOpen));
+});
+
+$("#mainMenu").addEventListener("click", event => {
+  const button = event.target.closest("[data-page]");
+  if (!button) return;
+  showPage(button.dataset.page);
+});
+
+document.addEventListener("click", event => {
+  if (!event.target.closest(".menu-wrap")) closeMenu();
+  if (!event.target.closest(".actions-holder")) closeAllActionMenus();
+});
+
+$("#mainSearchButton").addEventListener("click", handleMainSearch);
+$("#actionSelect").addEventListener("change", () => {
+  // Ao escolher Lançar textos, a lista de turmas é mostrada imediatamente.
+  if ($("#actionSelect").value === "texts") {
+    state.lastAction = "texts";
+    renderTextLaunch();
+  } else {
+    $("#mainContent").innerHTML = emptyState("Ação selecionada", "Clique em Buscar para carregar a lista correspondente.", "✦");
+  }
+});
+
+$("#modalClose").addEventListener("click", closeModal);
+$("#modalBackdrop").addEventListener("click", event => {
+  if (event.target === $("#modalBackdrop")) closeModal();
+});
+document.addEventListener("keydown", event => {
+  if (event.key === "Escape") {
+    if ($("#modalBackdrop").classList.contains("open")) closeModal();
+    closeMenu();
+    closeAllActionMenus();
+  }
+  if (event.key === "Enter" && event.target.closest("#classroomForm, #studentForm, #textForm")) {
+    if (event.target.tagName !== "TEXTAREA") {
+      event.preventDefault();
+      if (state.modalSaveHandler) state.modalSaveHandler();
+    }
+  }
+});
+
+$$("[data-home]").forEach(button => button.addEventListener("click", () => showPage("home")));
+
+$("#exportClassButton").addEventListener("click", () => {
+  const classId = $("#exportClassSelect").value;
+  renderExportClassFeedback(classId);
+});
+
+$("#exportStudentSearchButton").addEventListener("click", () => {
+  const classId = $("#exportStudentClassSelect").value;
+  renderExportStudents(classId);
+});
+
+/* ============================================================
+   Inicialização segura
+   ============================================================ */
+function initializeApp() {
+  loadData();
+  refreshAllClassroomSelects();
+  // Mostra a ação inicial com uma instrução clara, sem alterar os dados salvos.
+  $("#actionSelect").value = "classrooms";
+  $("#mainContent").innerHTML = emptyState("Seu espaço de trabalho está pronto", "Selecione uma ação e clique em Buscar para começar.", "✦");
+  // Aviso persistente sobre o armazenamento local, sem bloquear o uso.
+  console.info("Textos Escolares iniciado. Os dados são mantidos no localStorage deste navegador.");
+}
+
+initializeApp();
+</script>
+</body>
+</html>
