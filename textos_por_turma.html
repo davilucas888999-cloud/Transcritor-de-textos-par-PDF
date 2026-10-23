@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Textos por Turma — Organizador</title>
+<style>
+:root{--ink:#24202a;--muted:#716b78;--line:#e7e1eb;--paper:#fff;--bg:#f6f3f8;--accent:#762c3b;--accent2:#9c4858;--soft:#f7edf0;--good:#237653;--warn:#9b5c16;--shadow:0 8px 28px #24162b0b}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.45 system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif}
+header{background:linear-gradient(120deg,#4a202d,#843b4b);color:#fff;padding:24px max(20px,calc((100% - 1220px)/2));}
+header .eyebrow{font-size:12px;letter-spacing:.15em;text-transform:uppercase;opacity:.8}header h1{margin:5px 0 4px;font-size:clamp(25px,4vw,35px)}header p{margin:0;opacity:.86}
+main{max-width:1220px;margin:22px auto;padding:0 18px 44px;display:grid;grid-template-columns:320px minmax(0,1fr);gap:20px}
+.panel{background:var(--paper);border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow);overflow:hidden}.panel-head{padding:17px 18px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;gap:10px}.panel-head h2{font-size:16px;margin:0}.panel-body{padding:18px}
+label{display:block;font-size:12px;font-weight:750;color:#5e5665;margin:0 0 6px}input,select,textarea{font:inherit;width:100%;border:1px solid #d9d1df;border-radius:9px;padding:10px 11px;background:#fff;color:var(--ink);outline:none}input:focus,select:focus,textarea:focus{border-color:var(--accent2);box-shadow:0 0 0 3px #9c48581a}textarea{resize:vertical;min-height:210px;line-height:1.55}.field{margin-bottom:14px}.row{display:grid;grid-template-columns:1fr 1fr;gap:10px}.btn{border:1px solid #ded6e2;background:#fff;color:var(--ink);border-radius:9px;padding:9px 12px;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:7px}.btn:hover{background:#faf7fb}.btn.primary{background:var(--accent);color:#fff;border-color:var(--accent)}.btn.primary:hover{background:#612331}.btn.soft{background:var(--soft);color:var(--accent);border-color:#ead5da}.btn.danger{color:#a12c38}.btn.small{font-size:12px;padding:6px 8px}.btn.full{width:100%}.actions{display:flex;flex-wrap:wrap;gap:8px}.section-title{font-size:12px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);font-weight:800;margin:20px 0 9px}
+.class-list,.student-list{display:flex;flex-direction:column;gap:7px}.list-item{border:1px solid var(--line);border-radius:10px;padding:10px 11px;display:flex;justify-content:space-between;align-items:center;gap:8px;cursor:pointer;background:#fff}.list-item.active{border-color:#b97886;background:#fff7f8}.list-item strong{font-size:14px;display:block}.list-item small{color:var(--muted)}.list-item .count{font-size:11px;background:#f1edf4;border-radius:20px;padding:3px 7px;white-space:nowrap}.empty{padding:18px;border:1px dashed #d8cfdf;border-radius:12px;color:var(--muted);text-align:center;font-size:13px}
+.workspace{display:flex;flex-direction:column;gap:18px}.toolbar{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}.toolbar h2{font-size:18px;margin:0}.subtext{color:var(--muted);font-size:13px}.status{font-size:12px;color:var(--good);font-weight:700}.preview-wrap{background:#eae6ee;padding:20px;overflow:auto;border-radius:12px}.paper{background:#fff;width:100%;max-width:650px;min-height:840px;margin:auto;padding:52px 52px 44px;box-shadow:0 2px 15px #1c102010;position:relative;color:#1f1a20}.paper:before{content:"";position:absolute;inset:14px;border:1px solid #8b3544;pointer-events:none}.paper:after{content:"";position:absolute;inset:20px;border:1px solid #c8a3a8;pointer-events:none}.paper-inner{position:relative;z-index:1}.paper h1{font:700 27px/1.2 Georgia,serif;text-align:center;color:#6b2636;margin:10px 0 26px;overflow-wrap:anywhere}.paper .story{font:16px/1.55 Georgia,'Times New Roman',serif;text-align:justify;white-space:normal;overflow-wrap:anywhere}.paper .story p{margin:0 0 10px;text-indent:1.25cm}.paper .byline{font:italic 18px/1.3 'Segoe Script','Lucida Handwriting',cursive;text-align:right;margin-top:24px;color:#652838;overflow-wrap:anywhere}.paper .classline{text-align:right;font:12px system-ui,sans-serif;color:#655b63;margin-top:4px}
+.notice{font-size:12px;color:var(--muted);margin-top:8px}.hidden{display:none!important}.student-editor{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:16px}.editor-col{min-width:0}.editor-col h3{margin:0 0 13px;font-size:15px}.pill{font-size:11px;background:#f0ebf3;color:#665a70;padding:4px 8px;border-radius:20px}
+footer{text-align:center;color:var(--muted);font-size:12px;padding:0 20px 24px}
+@media(max-width:900px){main{grid-template-columns:1fr}.student-editor{grid-template-columns:1fr}.paper{min-height:650px;padding:40px 34px}.paper h1{font-size:24px}}
+@media print{body{background:#fff}header,main>.sidebar,.editor-panel,.toolbar,.no-print,footer{display:none!important}main{display:block;margin:0;padding:0;max-width:none}.workspace{display:block}.preview-panel{border:0;box-shadow:none}.preview-panel .panel-head{display:none}.preview-wrap{padding:0;background:#fff;border-radius:0;overflow:visible}.paper{width:210mm;height:297mm;min-height:0;max-width:none;margin:0;padding:20mm 20mm 18mm;box-shadow:none;break-after:page;page-break-after:always}.paper:last-child{break-after:auto;page-break-after:auto}.paper:before{inset:7mm}.paper:after{inset:9mm}.paper h1{font-size:25pt;margin:4mm 0 8mm}.paper .story{font-size:12pt;line-height:1.42}.paper .story p{margin-bottom:2.2mm;text-indent:10mm}.paper .byline{font-size:15pt;margin-top:6mm}.paper .classline{font-size:9pt}@page{size:A4;margin:0}}
+</style>
+</head>
+<body>
+<header>
+  <div class="eyebrow">Organização de trabalhos escolares</div>
+  <h1>Textos por Turma</h1>
+  <p>Cadastre turmas e alunos, organize os contos e exporte individualmente ou por turma.</p>
+</header>
+<main>
+  <aside class="sidebar">
+    <section class="panel">
+      <div class="panel-head"><h2>Turmas</h2><span class="pill" id="classCount">0 turmas</span></div>
+      <div class="panel-body">
+        <form id="classForm">
+          <div class="field"><label for="className">Nome da turma</label><input id="className" placeholder="Ex.: 702" required maxlength="50"></div>
+          <div class="field"><label for="classYear">Ano letivo (opcional)</label><input id="classYear" placeholder="Ex.: 2026" maxlength="10"></div>
+          <button class="btn primary full" type="submit">＋ Cadastrar turma</button>
+        </form>
+        <div class="section-title">Turmas cadastradas</div>
+        <div id="classList" class="class-list"></div>
+      </div>
+    </section>
+    <section class="panel" style="margin-top:16px">
+      <div class="panel-head"><h2>Alunos da turma</h2></div>
+      <div class="panel-body">
+        <div id="studentClassLabel" class="subtext" style="margin-bottom:12px">Selecione uma turma para cadastrar alunos.</div>
+        <form id="studentForm">
+          <div class="field"><label for="studentName">Nome completo</label><input id="studentName" placeholder="Nome do aluno" required maxlength="120"></div>
+          <div class="row">
+            <div class="field"><label for="studentGender">Autoria</label><select id="studentGender"><option value="f">Autora</option><option value="m">Autor</option><option value="n">Sem gênero informado</option></select></div>
+            <div class="field"><label for="studentNumber">Nº (opcional)</label><input id="studentNumber" placeholder="Ex.: 12" maxlength="10"></div>
+          </div>
+          <button class="btn full" id="addStudentBtn" type="submit">＋ Cadastrar aluno</button>
+        </form>
+        <div class="section-title">Lista de alunos</div>
+        <div id="studentList" class="student-list"></div>
+      </div>
+    </section>
+  </aside>
+  <section class="workspace">
+    <section class="panel editor-panel">
+      <div class="panel-head"><h2>Texto do aluno</h2><span id="saveStatus" class="status">Salvo neste navegador</span></div>
+      <div class="panel-body">
+        <div class="student-editor">
+          <div class="editor-col">
+            <h3>Conteúdo</h3>
+            <div class="field"><label for="workTitle">Título do texto</label><input id="workTitle" placeholder="Título do conto" maxlength="180"></div>
+            <div class="field"><label for="workText">Texto completo</label><textarea id="workText" placeholder="Cole ou digite aqui o conto do aluno. Separe os parágrafos com uma linha em branco."></textarea></div>
+            <div class="actions">
+              <button class="btn primary" id="saveWorkBtn" type="button">Salvar texto</button>
+              <button class="btn" id="clearWorkBtn" type="button">Limpar campos</button>
+            </div>
+            <p class="notice">Os dados são guardados neste navegador. Exporte uma cópia de segurança para não perdê-los ao trocar de dispositivo ou limpar os dados do navegador.</p>
+          </div>
+          <div class="editor-col">
+            <h3>Formatação e exportação</h3>
+            <div class="field"><label for="titleFont">Fonte do título</label><select id="titleFont"><option value="Georgia">Georgia — clássica</option><option value="'Segoe Script',cursive">Segoe Script — cursiva</option><option value="'Lucida Handwriting',cursive">Lucida Handwriting — manuscrita</option><option value="'Palatino Linotype',serif">Palatino — literária</option></select></div>
+            <div class="field"><label for="bodyFont">Fonte do texto</label><select id="bodyFont"><option value="Georgia">Georgia</option><option value="'Times New Roman',serif">Times New Roman</option><option value="Arial,sans-serif">Arial</option><option value="Lora,Georgia,serif">Lora (se disponível)</option></select></div>
+            <div class="row">
+              <div class="field"><label for="titleSize">Título (pt)</label><select id="titleSize"><option>22</option><option selected>25</option><option>28</option><option>30</option><option>32</option></select></div>
+              <div class="field"><label for="bodySize">Texto (pt)</label><select id="bodySize"><option>10</option><option>11</option><option selected>12</option><option>13</option><option>14</option></select></div>
+            </div>
+            <div class="field"><label for="frameStyle">Margem decorativa</label><select id="frameStyle"><option value="wine">Vinho delicado</option><option value="black">Preto clássico</option><option value="plain">Linha simples</option><option value="none">Sem margem</option></select></div>
+            <div class="actions">
+              <button class="btn soft" id="exportStudentBtn" type="button">Exportar aluno (.html)</button>
+              <button class="btn" id="printStudentBtn" type="button">Imprimir / PDF</button>
+            </div>
+            <div class="section-title">Exportar turma selecionada</div>
+            <div class="actions">
+              <button class="btn primary" id="exportClassBtn" type="button">Exportar todos (.html)</button>
+              <button class="btn" id="printClassBtn" type="button">Imprimir turma / PDF</button>
+              <button class="btn" id="backupBtn" type="button">Backup dos dados</button>
+            </div>
+            <p class="notice">A exportação HTML abre em qualquer navegador e pode ser impressa ou salva como PDF. A impressão da turma cria uma página por aluno; o tamanho da letra é reduzido automaticamente quando necessário para tentar ajustar cada texto em uma página.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+    <section class="panel preview-panel">
+      <div class="panel-head"><h2>Pré-visualização</h2><span class="pill" id="previewLabel">Nenhum aluno selecionado</span></div>
+      <div class="panel-body preview-wrap" id="previewWrap">
+        <div class="paper"><div class="paper-inner"><h1>Seu título aparecerá aqui</h1><div class="story"><p>Selecione uma turma e um aluno, depois digite o título e o texto para visualizar a página.</p></div><div class="byline">Autor(a): Nome do aluno</div></div></div>
+      </div>
+    </section>
+  </section>
+</main>
+<footer>Textos por Turma · Os dados ficam salvos localmente neste navegador.</footer>
+<script>
+(() => {
+const $ = id => document.getElementById(id);
+const KEY = 'textosPorTurmaApp_v1';
+let data = load();
+let activeClassId = null, activeStudentId = null;
+function uid(){return 'id'+Date.now().toString(36)+Math.random().toString(36).slice(2,8)}
+function load(){try{return JSON.parse(localStorage.getItem(KEY))||{classes:[]}}catch(e){return {classes:[]}}}
+function persist(){localStorage.setItem(KEY,JSON.stringify(data));$('saveStatus').textContent='Salvo neste navegador';}
+function esc(s=''){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function currentClass(){return data.classes.find(c=>c.id===activeClassId)}
+function currentStudent(){const c=currentClass();return c&&c.students.find(s=>s.id===activeStudentId)}
+function authorLabel(g){return g==='f'?'Autora':g==='m'?'Autor':'Autor(a)'}
+function paragraphs(text){return String(text||'').trim().split(/\n\s*\n/).filter(p=>p.trim()).map(p=>'<p>'+esc(p).replace(/\n/g,'<br>')+'</p>').join('') || '<p></p>'}
+function frameCss(style){if(style==='none')return '.paper:before,.paper:after{display:none}';if(style==='plain')return '.paper:before{border:1px solid #555}.paper:after{display:none}';if(style==='black')return '.paper:before{border:1px solid #222}.paper:after{border:1px solid #aaa}';return ''}
+function settings(){return {titleFont:$('titleFont').value,bodyFont:$('bodyFont').value,titleSize:$('titleSize').value,bodySize:$('bodySize').value,frameStyle:$('frameStyle').value}}
+function paperHTML(student,cls,opts=settings()){
+ const title=student.title||'Título do conto';
+ const story=student.text||'';
+ const byline=authorLabel(student.gender)+': '+student.name;
+ const frame=opts.frameStyle==='none'?'border:0':opts.frameStyle==='plain'?'border-color:#555':'border-color:#8b3544';
+ return `<article class="paper" style="--frame:${opts.frameStyle==='black'?'#222':opts.frameStyle==='plain'?'#555':'#8b3544'}"><div class="paper-inner"><h1 style="font-family:${opts.titleFont};font-size:${opts.titleSize}pt">${esc(title)}</h1><div class="story" style="font-family:${opts.bodyFont};font-size:${opts.bodySize}pt">${paragraphs(story)}</div><div class="byline">${esc(byline)}</div><div class="classline">${esc(cls.name)}${cls.year?' · '+esc(cls.year):''}</div></div></article>`;
+}
+function baseDoc(title,content,opts=settings()){
+return `<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${esc(title)}</title><style>
+*{box-sizing:border-box}body{margin:0;background:#eeeaf0;color:#211c22;font-family:Arial,sans-serif}.paper{width:210mm;height:297mm;min-height:297mm;margin:12px auto;background:#fff;padding:20mm 20mm 18mm;position:relative;page-break-after:always;break-after:page;overflow:hidden}.paper:last-child{page-break-after:auto;break-after:auto}.paper:before,.paper:after{content:"";position:absolute;inset:7mm;border:1px solid var(--frame,#8b3544);pointer-events:none}.paper:after{inset:9mm;border-color:#c8a3a8}.paper-inner{position:relative;z-index:1}.paper h1{text-align:center;color:#6b2636;line-height:1.2;margin:4mm 0 8mm;overflow-wrap:anywhere}.story{text-align:justify;line-height:1.42;overflow-wrap:anywhere}.story p{margin:0 0 2.2mm;text-indent:10mm}.byline{text-align:right;margin-top:6mm;color:#652838;font-family:'Segoe Script','Lucida Handwriting',cursive;font-size:15pt;overflow-wrap:anywhere}.classline{text-align:right;font-size:9pt;color:#655b63;margin-top:4px}
+${frameCss(opts.frameStyle)}
+@page{size:A4;margin:0}@media print{body{background:#fff}.paper{margin:0;box-shadow:none}}@media screen{.paper{box-shadow:0 2px 15px #0001}}
+</style></head><body>${content}
+<script>
+(function(){
+ function fitPages(){
+   document.querySelectorAll('.paper').forEach(function(paper){
+     var inner=paper.querySelector('.paper-inner'), story=paper.querySelector('.story'), title=paper.querySelector('h1');
+     if(!inner||!story||!title)return;
+     var available=paper.clientHeight-(parseFloat(getComputedStyle(paper).paddingTop)||0)-(parseFloat(getComputedStyle(paper).paddingBottom)||0);
+     var size=parseFloat(getComputedStyle(story).fontSize)||16;
+     var titleSize=parseFloat(getComputedStyle(title).fontSize)||32;
+     var guard=0;
+     while(inner.scrollHeight>available && size>10 && guard++<80){size-=0.35;story.style.fontSize=size+'px';story.style.lineHeight='1.28';}
+     while(inner.scrollHeight>available && titleSize>18 && guard++<100){titleSize-=1;title.style.fontSize=titleSize+'px';title.style.marginBottom='4mm';}
+     while(inner.scrollHeight>available && guard++<140){size=Math.max(8,size-0.2);story.style.fontSize=size+'px';story.style.lineHeight='1.15';title.style.marginTop='1mm';title.style.marginBottom='2mm';}
+   });
+ }
+ window.addEventListener('load',function(){setTimeout(fitPages,150);});
+ window.addEventListener('beforeprint',fitPages);
+})();
+</script></body></html>`;
+}
+function renderPreview(){
+ const s=currentStudent(), c=currentClass();
+ $('previewLabel').textContent=s?`${s.name} · ${c.name}`:'Nenhum aluno selecionado';
+ const wrap=$('previewWrap');
+ if(!s||!c){wrap.innerHTML='<div class="empty">Cadastre ou selecione uma turma e um aluno para visualizar o trabalho.</div>';return}
+ wrap.innerHTML=paperHTML(s,c);
+ const paper=wrap.querySelector('.paper');
+ if($('frameStyle').value==='none'){paper.style.setProperty('--frame','transparent');paper.style.setProperty('border','none')}
+ if($('frameStyle').value==='black')paper.style.setProperty('--frame','#222');
+ if($('frameStyle').value==='plain')paper.style.setProperty('--frame','#555');
+}
+function renderClasses(){
+ $('classCount').textContent=`${data.classes.length} turma${data.classes.length===1?'':'s'}`;
+ const el=$('classList');
+ if(!data.classes.length){el.innerHTML='<div class="empty">Nenhuma turma cadastrada ainda.</div>';return}
+ el.innerHTML=data.classes.map(c=>`<div class="list-item ${c.id===activeClassId?'active':''}" data-class="${c.id}"><div><strong>${esc(c.name)}</strong><small>${esc(c.year||'Ano não informado')}</small></div><span class="count">${c.students.length} aluno(s)</span></div>`).join('');
+ el.querySelectorAll('[data-class]').forEach(n=>n.onclick=()=>selectClass(n.dataset.class));
+}
+function renderStudents(){
+ const c=currentClass(), el=$('studentList');
+ $('studentClassLabel').textContent=c?`Turma selecionada: ${c.name}`:'Selecione uma turma para cadastrar alunos.';
+ $('studentForm').querySelectorAll('input,select,button').forEach(x=>x.disabled=!c);
+ if(!c){el.innerHTML='<div class="empty">Selecione uma turma primeiro.</div>';return}
+ if(!c.students.length){el.innerHTML='<div class="empty">Cadastre o primeiro aluno desta turma.</div>';return}
+ el.innerHTML=c.students.map(s=>`<div class="list-item ${s.id===activeStudentId?'active':''}" data-student="${s.id}"><div><strong>${esc(s.name)}</strong><small>${esc(authorLabel(s.gender))}${s.number?' · Nº '+esc(s.number):''}</small></div><button class="btn small danger" data-delete="${s.id}" title="Excluir aluno">×</button></div>`).join('');
+ el.querySelectorAll('[data-student]').forEach(n=>n.onclick=e=>{if(e.target.closest('[data-delete]'))return;selectStudent(n.dataset.student)});
+ el.querySelectorAll('[data-delete]').forEach(b=>b.onclick=e=>{e.stopPropagation();deleteStudent(b.dataset.delete)});
+}
+function selectClass(id){activeClassId=id;activeStudentId=null;renderClasses();renderStudents();loadStudentToEditor();renderPreview()}
+function selectStudent(id){activeStudentId=id;renderStudents();loadStudentToEditor();renderPreview()}
+function loadStudentToEditor(){
+ const s=currentStudent();
+ $('workTitle').value=s?.title||'';$('workText').value=s?.text||'';
+ if(s)$('studentGender').value=s.gender||'f';
+}
+function saveCurrent(showAlert=false){
+ const s=currentStudent();if(!s){if(showAlert)alert('Selecione um aluno antes de salvar o texto.');return false}
+ s.title=$('workTitle').value.trim();s.text=$('workText').value.trim();s.gender=$('studentGender').value;
+ persist();renderStudents();renderPreview();if(showAlert)alert('Texto salvo com sucesso.');return true;
+}
+function deleteStudent(id){const c=currentClass();if(!c)return;const s=c.students.find(x=>x.id===id);if(!confirm(`Excluir o cadastro de ${s?.name||'este aluno'} e o texto dele?`))return;c.students=c.students.filter(x=>x.id!==id);if(activeStudentId===id)activeStudentId=null;persist();renderStudents();loadStudentToEditor();renderPreview()}
+function download(filename,content,type='text/html;charset=utf-8'){const blob=new Blob(['\ufeff',content],{type});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download=filename;a.click();setTimeout(()=>URL.revokeObjectURL(url),1000)}
+function safeName(s){return (s||'texto').normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-zA-Z0-9_-]+/g,'_').replace(/^_+|_+$/g,'').slice(0,80)||'texto'}
+function exportStudent(){if(!saveCurrent(false))return alert('Selecione um aluno primeiro.');const s=currentStudent(),c=currentClass();download(`${safeName(c.name)}_${safeName(s.name)}.html`,baseDoc(s.title||s.name,paperHTML(s,c)))}
+function exportClass(){const c=currentClass();if(!c)return alert('Selecione uma turma primeiro.');saveCurrent(false);if(!c.students.length)return alert('Esta turma ainda não tem alunos.');const content=c.students.map(s=>paperHTML(s,c)).join('');download(`Turma_${safeName(c.name)}_textos.html`,baseDoc(`Textos da turma ${c.name}`,content))}
+function printItems(items,title){const w=window.open('','_blank');if(!w)return alert('O navegador bloqueou a janela de impressão. Permita pop-ups para este site.');w.document.open();w.document.write(baseDoc(title,items.map(x=>paperHTML(x.student,x.cls,x.opts)).join(''),items[0]?.opts||settings()));w.document.close();w.onload=()=>{w.focus();setTimeout(()=>w.print(),350)}}
+function printStudent(){if(!saveCurrent(false))return alert('Selecione um aluno primeiro.');const s=currentStudent(),c=currentClass();printItems([{student:s,cls:c,opts:settings()}],s.title||s.name)}
+function printClass(){const c=currentClass();if(!c)return alert('Selecione uma turma primeiro.');saveCurrent(false);if(!c.students.length)return alert('Esta turma ainda não tem alunos.');printItems(c.students.map(s=>({student:s,cls:c,opts:settings()})),`Textos da turma ${c.name}`)}
+$('classForm').onsubmit=e=>{e.preventDefault();const name=$('className').value.trim();if(!name)return;if(data.classes.some(c=>c.name.toLowerCase()===name.toLowerCase()))return alert('Já existe uma turma com esse nome.');const c={id:uid(),name,year:$('classYear').value.trim(),students:[]};data.classes.push(c);persist();$('className').value='';$('classYear').value='';selectClass(c.id)};
+$('studentForm').onsubmit=e=>{e.preventDefault();const c=currentClass();if(!c)return;const name=$('studentName').value.trim();if(!name)return;if(c.students.some(s=>s.name.toLowerCase()===name.toLowerCase()))return alert('Já existe um aluno com esse nome nesta turma.');const s={id:uid(),name,gender:$('studentGender').value,number:$('studentNumber').value.trim(),title:'',text:''};c.students.push(s);persist();$('studentName').value='';$('studentNumber').value='';selectStudent(s.id)};
+$('saveWorkBtn').onclick=()=>saveCurrent(true);
+$('clearWorkBtn').onclick=()=>{if(!confirm('Limpar o título e o texto dos campos? O texto já salvo não será apagado até você salvar novamente.'))return;$('workTitle').value='';$('workText').value='';renderPreview()};
+$('exportStudentBtn').onclick=exportStudent;$('exportClassBtn').onclick=exportClass;$('printStudentBtn').onclick=printStudent;$('printClassBtn').onclick=printClass;
+$('backupBtn').onclick=()=>download('backup_textos_por_turma.json',JSON.stringify(data,null,2),'application/json;charset=utf-8');
+['titleFont','bodyFont','titleSize','bodySize','frameStyle'].forEach(id=>$(id).onchange=renderPreview);
+$('workTitle').oninput=renderPreview;$('workText').oninput=renderPreview;
+$('studentGender').onchange=()=>{const s=currentStudent();if(s){s.gender=$('studentGender').value;persist();renderStudents();renderPreview()}};
+renderClasses();renderStudents();renderPreview();
+})();
+</script>
+</body>
+</html>
