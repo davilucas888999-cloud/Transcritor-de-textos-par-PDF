@@ -1170,7 +1170,7 @@ function openTextModal(studentId) {
       <div class="field">
         <label for="textBody">Texto propriamente dito *</label>
         <textarea id="textBody" required spellcheck="true" placeholder="Cole ou escreva o texto completo aqui...">${escapeHTML(student.textBody)}</textarea>
-        <span class="helper">Os parágrafos separados por linhas em branco serão preservados. A primeira linha de cada parágrafo terá recuo de 1,25 cm no PDF.</span>
+        <span class="helper">Cada vez que você pressionar Enter, começa um novo parágrafo com recuo de 1,25 cm no PDF.</span>
       </div>
     </form>`;
   openModal({
@@ -1245,7 +1245,12 @@ function previewStudentText(studentId) {
 }
 
 function splitParagraphs(text) {
-  return String(text || "").replace(/\r\n?/g, "\n").trim().split(/\n\s*\n/).map(part => part.trim()).filter(part => part.length > 0);
+  // Cada Enter inicia um novo parágrafo, mesmo sem linha em branco entre eles.
+  return String(text || "")
+    .replace(/\r\n?/g, "\n")
+    .split("\n")
+    .map(part => part.trim())
+    .filter(part => part.length > 0);
 }
 
 /* ============================================================
@@ -1384,10 +1389,19 @@ function generatePDF(students, filename) {
         pdf.line(x + sx * 5, y, x + sx * 1.7, y);
         pdf.circle(x + sx * 2.2, y + sy * 2.2, 0.55, "S");
       });
-      pdf.setTextColor(139, 64, 85);
-      pdf.setFont("times", "normal");
-      pdf.setFontSize(10);
-      pdf.text("❧", pageWidth / 2, 20, { align: "center" });
+      // Ornamento central formado somente por formas geométricas, sem letras.
+      const cx = pageWidth / 2;
+      const cy = 20;
+      pdf.setDrawColor(139, 64, 85);
+      pdf.setLineWidth(0.35);
+      pdf.line(cx - 8, cy, cx - 2.2, cy);
+      pdf.line(cx + 2.2, cy, cx + 8, cy);
+      pdf.line(cx, cy - 2.2, cx + 2.2, cy);
+      pdf.line(cx + 2.2, cy, cx, cy + 2.2);
+      pdf.line(cx, cy + 2.2, cx - 2.2, cy);
+      pdf.line(cx - 2.2, cy, cx, cy - 2.2);
+      pdf.circle(cx - 10, cy, 0.55, "S");
+      pdf.circle(cx + 10, cy, 0.55, "S");
     }
 
     function addPageWithFrame() {
@@ -1465,7 +1479,7 @@ function generatePDF(students, filename) {
       y += 9;
 
       const paragraphs = splitParagraphs(student.textBody);
-      // Separa os parágrafos originais por linhas em branco; não reescreve nem resume o conteúdo.
+      // Cada linha criada com Enter é tratada como um parágrafo com recuo.
       for (const paragraph of paragraphs) {
         let currentSize = fontSize;
         const estimatedLines = pdf.splitTextToSize(paragraph, maxWidth).length;
