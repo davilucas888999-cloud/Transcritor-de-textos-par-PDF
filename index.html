@@ -1414,89 +1414,90 @@ function generatePDF(students, filename) {
       return fontSize * 0.3528 * factor;
     }
 
-    function writeParagraph(paragraph, y, fontSize) {
-      pdf.setFont("times", "normal");
-      pdf.setFontSize(fontSize);
-      pdf.setTextColor(42, 35, 38);
-      const indent = 12.5; // Recuo exato de 1,25 cm (12,5 mm)
-      const firstLineWidth = Math.max(25, maxWidth - indent);
-      const firstLines = pdf.splitTextToSize(paragraph, firstLineWidth);
-      const continuationLines = [];
-      // A primeira linha é separada para aplicar o recuo; as linhas seguintes voltam à margem do corpo.
-      if (firstLines.length > 0) {
-        const firstLine = firstLines[0];
-        const remainingText = paragraph.slice(firstLine.length).trimStart();
-        const firstLineActualWidth = pdf.getTextWidth(firstLine);
-        if (remainingText) {
-          const rest = pdf.splitTextToSize(remainingText, maxWidth);
-          continuationLines.push(...rest);
-        }
-        const lineHeight = getLineHeight(fontSize, 1.48);
-        if (y + lineHeight > pageHeight - content.bottom) {
-          y = addPageWithFrame();
-          pdf.setFont("times", "normal");
-          pdf.setFontSize(fontSize);
-        }
-        pdf.text(firstLine, content.left + indent, y);
-        y += lineHeight;
-        for (const line of continuationLines) {
-          if (y + lineHeight > pageHeight - content.bottom) {
-            y = addPageWithFrame();
-            pdf.setFont("times", "normal");
-            pdf.setFontSize(fontSize);
-          }
-          pdf.text(line, content.left, y);
-          y += lineHeight;
-        }
-        return y + fontSize * 0.3528 * 0.55;
-      }
-      return y;
-    }
-
-    function writeStudent(student) {
-      let y = content.top;
-      let fontSize = 12.5;
-      drawFrame();
-
-      // Título: centralizado, com ajuste moderado caso seja comprido.
-      const title = student.textTitle;
+    // Mede o texto completo antes de desenhar. Cada aluno/texto fica em uma única folha A4.
+    function measureStudent(student, bodySize) {
+      const title = String(student.textTitle || "");
       let titleSize = 17;
       pdf.setFont("times", "bold");
-      while (titleSize > 12 && pdf.getTextWidth(title) > maxWidth) {
+      pdf.setFontSize(titleSize);
+      while (titleSize > 9 && pdf.getTextWidth(title) > maxWidth) {
         titleSize -= 0.5;
         pdf.setFontSize(titleSize);
       }
-      pdf.setFont("times", "bold");
       pdf.setFontSize(titleSize);
-      pdf.setTextColor(75, 28, 43);
       const titleLines = pdf.splitTextToSize(title, maxWidth);
-      const titleLineHeight = getLineHeight(titleSize, 1.3);
-      titleLines.forEach((line, index) => {
-        if (y + titleLineHeight > pageHeight - content.bottom) y = addPageWithFrame();
+      const titleHeight = titleLines.length * getLineHeight(titleSize, 1.25);
+      const paragraphs = splitParagraphs(student.textBody);
+      let bodyHeight = 0;
+      const paragraphLayouts = [];
+      for (const paragraph of paragraphs) {
+        pdf.setFont("times", "normal");
+        pdf.setFontSize(bodySize);
+        const indent = 12.5;
+        const firstWidth = Math.max(18, maxWidth - indent);
+        const allLines = pdf.splitTextToSize(paragraph, maxWidth);
+        const lines = [];
+        if (allLines.length) {
+          // A primeira linha recebe recuo; as demais mantêm a margem normal.
+          const first = pdf.splitTextToSize(paragraph, firstWidth);
+          if (first.length) {
+            lines.push({ text: first[0], indent: true });
+            const remaining = paragraph.slice(first[0].length).trimStart();
+            if (remaining) pdf.splitTextToSize(remaining, maxWidth).forEach(line => lines.push({ text: line, indent: false }));
+          }
+        }
+        const lineHeight = getLineHeight(bodySize, 1.28);
+        bodyHeight += lines.length * lineHeight + bodySize * 0.3528 * 0.22;
+        paragraphLayouts.push({ lines, lineHeight });
+      }
+      const author = authorLine(student);
+      const authorSize = Math.max(8, Math.min(10.5, bodySize * 0.84));
+      pdf.setFont("times", "italic");
+      pdf.setFontSize(authorSize);
+      const authorLines = pdf.splitTextToSize(author, maxWidth);
+      const authorHeight = authorLines.length * getLineHeight(authorSize, 1.25);
+      const titleGap = bodySize * 0.3528 * 0.9;
+      const authorGap = bodySize * 0.3528 * 1.0;
+      const totalHeight = titleHeight + titleGap + bodyHeight + authorGap + authorHeight;
+      return { title, titleSize, titleLines, paragraphs, paragraphLayouts, bodySize, author, authorSize, authorLines, totalHeight, titleHeight, titleGap, authorGap };
+    }
+
+    function writeStudent(student) {
+      drawFrame();
+      const startY = content.top;
+      const availableHeight = pageHeight - content.bottom - startY;
+      let layout = measureStudent(student, 12.5);
+      // Reduz a tipografia gradualmente até o texto inteiro caber na mesma folha.
+      for (let size = 12.5; layout.totalHeight > availableHeight && size > 6.5; size -= 0.5) {
+        layout = measureStudent(student, Math.max(6.5, size - 0.5));
+      }
+      let y = startY;
+      pdf.setFont("times", "bold");
+      pdf.setFontSize(layout.titleSize);
+      pdf.setTextColor(75, 28, 43);
+      const titleLineHeight = getLineHeight(layout.titleSize, 1.25);
+      layout.titleLines.forEach(line => {
         pdf.text(line, pageWidth / 2, y, { align: "center" });
         y += titleLineHeight;
       });
-      y += 9;
+      y += layout.titleGap;
 
-      const paragraphs = splitParagraphs(student.textBody);
-      // Cada linha criada com Enter é tratada como um parágrafo com recuo.
-      for (const paragraph of paragraphs) {
-        let currentSize = fontSize;
-        const estimatedLines = pdf.splitTextToSize(paragraph, maxWidth).length;
-        if (estimatedLines > 0 && estimatedLines < 4) currentSize = 13;
-        y = writeParagraph(paragraph, y, currentSize);
-      }
+      pdf.setFont("times", "normal");
+      pdf.setFontSize(layout.bodySize);
+      pdf.setTextColor(42, 35, 38);
+      layout.paragraphLayouts.forEach(paragraph => {
+        paragraph.lines.forEach(line => {
+          pdf.text(line.text, content.left + (line.indent ? 12.5 : 0), y);
+          y += paragraph.lineHeight;
+        });
+        y += layout.bodySize * 0.3528 * 0.22;
+      });
 
-      const author = authorLine(student);
-      const authorSize = 10.5;
-      const authorLines = pdf.splitTextToSize(author, maxWidth);
-      const authorHeight = authorLines.length * getLineHeight(authorSize, 1.4);
-      if (y + 12 + authorHeight > pageHeight - content.bottom) y = addPageWithFrame();
-      y += 8;
+      y += layout.authorGap;
       pdf.setFont("times", "italic");
-      pdf.setFontSize(authorSize);
+      pdf.setFontSize(layout.authorSize);
       pdf.setTextColor(75, 57, 63);
-      pdf.text(authorLines, pageWidth - content.right, y, { align: "right" });
+      pdf.text(layout.authorLines, pageWidth - content.right, y, { align: "right" });
     }
 
     validStudents.forEach((student, index) => {
