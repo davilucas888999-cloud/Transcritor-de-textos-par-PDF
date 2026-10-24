@@ -559,7 +559,7 @@ hr.soft { border: 0; border-top: 1px solid var(--line); margin: 17px 0; }
     <div id="exportStudentResults" class="content-area"></div>
   </section>
 
-  <div class="footer-note">Textos Escolares · Os dados ficam guardados neste navegador e neste dispositivo.</div>
+  <div class="footer-note"><span>Textos Escolares · Os dados ficam guardados neste navegador e neste dispositivo.</span><span class="app-version">Versão 1.2.8</span></div>
 </main>
 
 <div class="modal-backdrop" id="modalBackdrop" role="presentation">
@@ -1568,31 +1568,33 @@ function generatePDF(students, filename, classReport = null) {
         pdf.setFont("times", "bold"); pdf.setFontSize(16); pdf.setTextColor(112, 38, 59); pdf.text(String(item[0]), x + cardW/2, 78, { align: "center" });
         pdf.setFont("helvetica", "bold"); pdf.setFontSize(6.8); pdf.setTextColor(81, 25, 43); pdf.text(item[1], x + cardW/2, 85, { align: "center" });
       });
-      let y = 99;
+      let y = 96;
       const drawHead = (continuation = false) => {
-        pdf.setFont("times", "bold"); pdf.setFontSize(continuation ? 9 : 9); pdf.setTextColor(81, 25, 43);
+        pdf.setFont("times", "bold"); pdf.setFontSize(9.5); pdf.setTextColor(81, 25, 43);
         pdf.text(continuation ? "RELAÇÃO DE ALUNOS — " + String(classReport.name || "").toLocaleUpperCase("pt-BR") : "RELAÇÃO DE ALUNOS", 27, y);
-        y += 5; pdf.setFont("helvetica", "bold"); pdf.setFontSize(7); pdf.setTextColor(90, 70, 77);
+        y += 5.5; pdf.setFont("helvetica", "bold"); pdf.setFontSize(8); pdf.setTextColor(90, 70, 77);
         pdf.text("Nº", 28, y); pdf.text("NOME COMPLETO", 42, y); pdf.text("SITUAÇÃO", 181, y, { align: "right" });
-        y += 4.5; pdf.setFont("helvetica", "normal"); pdf.setFontSize(6.6); pdf.setTextColor(42, 35, 38);
+        y += 5; pdf.setFont("helvetica", "normal"); pdf.setFontSize(8); pdf.setTextColor(42, 35, 38);
       };
       drawHead();
       if (allStudents.length) {
+        // Mantém todos os alunos na primeira folha e usa a maior altura possível por linha.
+        const tableBottom = 271;
+        const rowHeight = Math.min(5.4, (tableBottom - y) / allStudents.length);
+        const rowFontSize = rowHeight < 4.15 ? 7 : rowHeight < 4.65 ? 7.5 : 8.2;
         allStudents.forEach((student, index) => {
-          // Lista compacta para que a relação completa da turma caiba em uma única folha.
-          pdf.setFont("helvetica", "normal"); pdf.setFontSize(6.6);
+          pdf.setFont("helvetica", "normal"); pdf.setFontSize(rowFontSize);
           const nameLines = pdf.splitTextToSize(upperName(student.name), 130).slice(0, 1);
-          const rowHeight = 4.9;
-          const centerY = y + rowHeight / 2 + 1.4;
+          const centerY = y + rowHeight / 2 + rowFontSize * 0.3528 * 0.35;
           pdf.text(String(index + 1), 28, centerY);
           pdf.text(nameLines[0] || "", 42, centerY);
-          pdf.setFont("helvetica", "bold"); pdf.setFontSize(6.3);
+          pdf.setFont("helvetica", "bold"); pdf.setFontSize(Math.max(6.8, rowFontSize - 0.2));
           pdf.setTextColor(studentHasText(student) ? 40 : 138, studentHasText(student) ? 106 : 91, studentHasText(student) ? 77 : 20);
           pdf.text(studentHasText(student) ? "ENVIADO" : "NÃO ENVIADO", 181, centerY, { align: "right" });
-          // A linha fica no limite inferior da linha da tabela, nunca sobre o texto.
+          // A linha separadora acompanha a altura real da linha e fica abaixo do texto.
           pdf.setDrawColor(205, 190, 195); pdf.setLineWidth(0.25);
           pdf.line(25, y + rowHeight, 185, y + rowHeight);
-          pdf.setFont("helvetica", "normal"); pdf.setFontSize(6.6); pdf.setTextColor(42,35,38); y += rowHeight;
+          pdf.setFont("helvetica", "normal"); pdf.setFontSize(rowFontSize); pdf.setTextColor(42,35,38); y += rowHeight;
         });
       } else {
         pdf.setFont("helvetica", "italic"); pdf.setFontSize(9); pdf.setTextColor(110, 95, 100);
