@@ -1297,12 +1297,12 @@ function renderExportClassFeedback(classId) {
       <div class="export-actions">
         <button class="btn btn-primary" id="confirmClassExport" type="button">Continuar e exportar ${withText.length} texto(s)</button>
       </div>`;
-    $("#confirmClassExport").addEventListener("click", () => generatePDF(withText, `${safeFilename(classroom.name)}_textos_escolares.pdf`));
+    $("#confirmClassExport").addEventListener("click", () => generatePDF(students, `${safeFilename(classroom.name)}_textos_escolares.pdf`, classroom));
   } else {
     feedback.innerHTML = `
       <div class="notice success"><strong>Todos os alunos possuem texto.</strong><p>Não há textos pendentes nesta turma.</p></div>
       <div class="export-actions"><button class="btn btn-primary" id="confirmClassExport" type="button">Exportar ${withText.length} texto(s) em PDF</button></div>`;
-    $("#confirmClassExport").addEventListener("click", () => generatePDF(withText, `${safeFilename(classroom.name)}_textos_escolares.pdf`));
+    $("#confirmClassExport").addEventListener("click", () => generatePDF(students, `${safeFilename(classroom.name)}_textos_escolares.pdf`, classroom));
   }
 }
 
@@ -1360,7 +1360,7 @@ function safeFilename(value) {
 /* ============================================================
    Gerador PDF A4 — moldura repetida, parágrafos e recuo de 12,5 mm
    ============================================================ */
-function generatePDF(students, filename) {
+function generatePDF(students, filename, classReport = null) {
   if (!window.jspdf || !window.jspdf.jsPDF) {
     openModal({
       title: "Biblioteca de PDF indisponível",
@@ -1370,7 +1370,8 @@ function generatePDF(students, filename) {
     });
     return;
   }
-  const validStudents = students.filter(studentHasText);
+  const allStudents = classReport ? [...students].sort((a, b) => upperName(a.name).localeCompare(upperName(b.name), "pt-BR")) : students;
+  const validStudents = allStudents.filter(studentHasText);
   if (!validStudents.length) {
     showToast("Não há textos completos para exportar.", "warning");
     return;
@@ -1539,6 +1540,51 @@ function generatePDF(students, filename) {
         pdf.setFont("times", "italic");
         pdf.text(layout.authorLines, pageWidth - content.right, y, { align: "right" });
       }
+    }
+
+    if (classReport) {
+      // Capa e relação de alunos exclusivas da exportação por turma.
+      pdf.setFillColor(255, 255, 255); pdf.rect(0, 0, pageWidth, pageHeight, "F");
+      pdf.setDrawColor(139, 64, 85); pdf.setLineWidth(0.6); pdf.rect(12, 12, 186, 273);
+      pdf.setDrawColor(198, 151, 164); pdf.setLineWidth(0.25); pdf.rect(16, 16, 178, 265);
+      pdf.setTextColor(81, 25, 43); pdf.setFont("times", "bold"); pdf.setFontSize(22);
+      pdf.text("RELATÓRIO DE TEXTOS ESCOLARES", 105, 48, { align: "center", maxWidth: 160 });
+      pdf.setFont("times", "normal"); pdf.setFontSize(13); pdf.setTextColor(90, 70, 77);
+      pdf.text("TURMA", 105, 76, { align: "center" });
+      pdf.setFont("times", "bold"); pdf.setFontSize(19); pdf.setTextColor(81, 25, 43);
+      pdf.text(String(classReport.name || "").toLocaleUpperCase("pt-BR"), 105, 88, { align: "center", maxWidth: 160 });
+      const pendingCount = allStudents.filter(student => !studentHasText(student)).length;
+      const cards = [[validStudents.length, "TEXTOS ENVIADOS"], [pendingCount, "TEXTOS PENDENTES"], [allStudents.length, "TOTAL DE ALUNOS"]];
+      const cardW = 52, gap = 5, startX = (210 - (cardW * 3 + gap * 2)) / 2;
+      cards.forEach((item, i) => {
+        const x = startX + i * (cardW + gap);
+        pdf.setFillColor(255, 248, 250); pdf.setDrawColor(234, 209, 216); pdf.roundedRect(x, 105, cardW, 24, 2, 2, "FD");
+        pdf.setFont("times", "bold"); pdf.setFontSize(16); pdf.setTextColor(112, 38, 59); pdf.text(String(item[0]), x + cardW/2, 114, { align: "center" });
+        pdf.setFont("helvetica", "bold"); pdf.setFontSize(6.8); pdf.setTextColor(81, 25, 43); pdf.text(item[1], x + cardW/2, 122, { align: "center" });
+      });
+      let y = 148;
+      const drawHead = (continuation = false) => {
+        pdf.setFont("times", "bold"); pdf.setFontSize(continuation ? 12 : 11); pdf.setTextColor(81, 25, 43);
+        pdf.text(continuation ? "RELAÇÃO DE ALUNOS — " + String(classReport.name || "").toLocaleUpperCase("pt-BR") : "RELAÇÃO DE ALUNOS", 27, y);
+        y += 8; pdf.setFont("helvetica", "bold"); pdf.setFontSize(8.5); pdf.setTextColor(90, 70, 77);
+        pdf.text("Nº", 28, y); pdf.text("NOME COMPLETO", 42, y); pdf.text("SITUAÇÃO", 181, y, { align: "right" });
+        y += 7; pdf.setFont("helvetica", "normal"); pdf.setFontSize(8.2); pdf.setTextColor(42, 35, 38);
+      };
+      drawHead();
+      allStudents.forEach((student, index) => {
+        const nameLines = pdf.splitTextToSize(upperName(student.name), 125);
+        const rowHeight = Math.max(6, nameLines.length * 4.2);
+        if (y + rowHeight > 269) {
+          pdf.addPage("a4", "portrait"); pdf.setFillColor(255,255,255); pdf.rect(0,0,210,297,"F");
+          pdf.setDrawColor(139,64,85); pdf.setLineWidth(0.5); pdf.rect(12,12,186,273); y = 27; drawHead(true);
+        }
+        pdf.text(String(index + 1), 28, y); pdf.text(nameLines, 42, y);
+        pdf.setFont("helvetica", "bold"); pdf.setFontSize(7.8);
+        pdf.setTextColor(studentHasText(student) ? 40 : 138, studentHasText(student) ? 106 : 91, studentHasText(student) ? 77 : 20);
+        pdf.text(studentHasText(student) ? "ENVIADO" : "NÃO ENVIADO", 181, y, { align: "right" });
+        pdf.setFont("helvetica", "normal"); pdf.setFontSize(8.2); pdf.setTextColor(42,35,38); y += rowHeight;
+      });
+      pdf.addPage("a4", "portrait");
     }
 
     validStudents.forEach((student, index) => {
