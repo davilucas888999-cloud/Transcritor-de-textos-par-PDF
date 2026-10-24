@@ -1580,18 +1580,21 @@ function generatePDF(students, filename, classReport = null) {
       if (allStudents.length) {
         allStudents.forEach((student, index) => {
           const nameLines = pdf.splitTextToSize(upperName(student.name), 125);
-          const rowHeight = Math.max(6, nameLines.length * 4.2);
+          // Altura da linha inclui espaço acima e abaixo do texto, inclusive nomes quebrados.
+          const lineHeight = 4.2;
+          const rowHeight = Math.max(8, nameLines.length * lineHeight + 4);
           if (y + rowHeight > 269) {
             pdf.addPage("a4", "portrait"); pdf.setFillColor(255,255,255); pdf.rect(0,0,210,297,"F");
             pdf.setDrawColor(139,64,85); pdf.setLineWidth(0.5); pdf.rect(12,12,186,273); y = 27; drawHead(true);
           }
-          pdf.text(String(index + 1), 28, y); pdf.text(nameLines, 42, y);
+          const textY = y + 3;
+          pdf.text(String(index + 1), 28, textY); pdf.text(nameLines, 42, textY, { lineHeightFactor: 1.15 });
           pdf.setFont("helvetica", "bold"); pdf.setFontSize(7.8);
           pdf.setTextColor(studentHasText(student) ? 40 : 138, studentHasText(student) ? 106 : 91, studentHasText(student) ? 77 : 20);
-          pdf.text(studentHasText(student) ? "ENVIADO" : "NÃO ENVIADO", 181, y, { align: "right" });
-          // Linha horizontal separando cada aluno da próxima linha.
+          pdf.text(studentHasText(student) ? "ENVIADO" : "NÃO ENVIADO", 181, textY, { align: "right" });
+          // A linha fica no limite inferior da linha da tabela, nunca sobre o texto.
           pdf.setDrawColor(205, 190, 195); pdf.setLineWidth(0.25);
-          pdf.line(25, y + rowHeight - 1.5, 185, y + rowHeight - 1.5);
+          pdf.line(25, y + rowHeight, 185, y + rowHeight);
           pdf.setFont("helvetica", "normal"); pdf.setFontSize(8.2); pdf.setTextColor(42,35,38); y += rowHeight;
         });
       } else {
