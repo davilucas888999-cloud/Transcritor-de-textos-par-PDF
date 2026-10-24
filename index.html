@@ -197,6 +197,9 @@ h1 {
   align-items: end;
   gap: 12px;
 }
+.action-row.with-class {
+  grid-template-columns: minmax(180px, 1fr) minmax(180px, 1fr) auto;
+}
 .field { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
 .field label { color: #59464d; font-size: 12px; font-weight: 700; }
 .field input, .field select, .field textarea {
@@ -471,7 +474,10 @@ hr.soft { border: 0; border-top: 1px solid var(--line); margin: 17px 0; }
       <nav class="dropdown-menu" id="mainMenu" aria-label="Menu principal">
         <button type="button" data-page="export-class"><span class="menu-symbol">▤</span><span>Exportar textos por turma</span></button>
         <button type="button" data-page="export-student"><span class="menu-symbol">▧</span><span>Exportar textos por aluno</span></button>
+        <button type="button" id="exportDataButton"><span class="menu-symbol">⇩</span><span>Exportar todos os dados (backup)</span></button>
+        <button type="button" id="importDataButton"><span class="menu-symbol">⇧</span><span>Importar dados de backup</span></button>
       </nav>
+      <input id="importDataFile" type="file" accept=".json,application/json" hidden>
     </div>
   </div>
 </header>
@@ -490,7 +496,7 @@ hr.soft { border: 0; border-top: 1px solid var(--line); margin: 17px 0; }
         <p>Escolha o que deseja fazer e carregue os dados correspondentes.</p>
       </div>
     </div>
-    <div class="action-row">
+    <div class="action-row" id="mainActionRow">
       <div class="field">
         <label for="actionSelect">Ação</label>
         <select id="actionSelect">
@@ -498,6 +504,10 @@ hr.soft { border: 0; border-top: 1px solid var(--line); margin: 17px 0; }
           <option value="students">Cadastrar aluno</option>
           <option value="texts">Lançar textos</option>
         </select>
+      </div>
+      <div class="field hidden" id="mainTextClassField">
+        <label for="mainTextClassSelect">Turma</label>
+        <select id="mainTextClassSelect"><option value="">Selecione uma turma</option></select>
       </div>
       <button class="btn btn-primary" id="mainSearchButton" type="button">Buscar <span aria-hidden="true">→</span></button>
     </div>
@@ -789,7 +799,7 @@ function refreshClassroomSelect(select, placeholder, selectedValue = "") {
   state.classrooms.forEach(classroom => {
     const item = document.createElement("option");
     item.value = classroom.id;
-    item.textContent = `${classroom.name} — ${classroom.schoolYear}`;
+    item.textContent = classroom.name;
     select.appendChild(item);
   });
   if (state.classrooms.some(item => item.id === current)) select.value = current;
@@ -807,7 +817,7 @@ function statusMarkup(student) {
 
 function renderClassroomOptions(selectedId = "") {
   return state.classrooms.map(classroom =>
-    `<option value="${escapeHTML(classroom.id)}" ${classroom.id === selectedId ? "selected" : ""}>${escapeHTML(classroom.name)} — ${escapeHTML(classroom.schoolYear)}</option>`
+    `<option value="${escapeHTML(classroom.id)}" ${classroom.id === selectedId ? "selected" : ""}>${escapeHTML(classroom.name)}</option>`
   ).join("");
 }
 
@@ -851,6 +861,26 @@ function renderClassrooms() {
   $$("[data-delete-class]", content).forEach(button => button.addEventListener("click", () => deleteClassroom(button.dataset.deleteClass)));
 }
 
+const SCHOOL_YEAR_OPTIONS = [
+  "1º Período", "2º Período", "3º Período",
+  "1º Ano do Ensino Fundamental", "2º Ano do Ensino Fundamental", "3º Ano do Ensino Fundamental",
+  "4º Ano do Ensino Fundamental", "5º Ano do Ensino Fundamental", "6º Ano do Ensino Fundamental",
+  "7º Ano do Ensino Fundamental", "8º Ano do Ensino Fundamental", "9º Ano do Ensino Fundamental",
+  "1º Ano do Ensino Médio", "2º Ano do Ensino Médio", "3º Ano do Ensino Médio"
+];
+
+function normalizeSchoolYear(value) {
+  const raw = normalizeName(value);
+  const legacy = raw.match(/^(\d+)º?\s*Ano$/i);
+  if (legacy) {
+    const n = Number(legacy[1]);
+    if (n >= 1 && n <= 9) return `${n}º Ano do Ensino Fundamental`;
+    if (n >= 1 && n <= 3) return `${n}º Ano do Ensino Médio`;
+  }
+  const normalized = SCHOOL_YEAR_OPTIONS.find(option => upperName(option) === upperName(raw));
+  return normalized || raw;
+}
+
 function openClassroomModal(classroomId = "") {
   const classroom = classroomId ? getClassroom(classroomId) : null;
   const isEditing = Boolean(classroom);
@@ -858,11 +888,14 @@ function openClassroomModal(classroomId = "") {
     <form class="form-stack" id="classroomForm">
       <div class="field">
         <label for="className">Nome da turma *</label>
-        <input id="className" name="className" maxlength="100" required value="${escapeHTML(classroom?.name || "")}" placeholder="Ex.: 7º ANO - 702">
+        <input id="className" name="className" maxlength="100" required value="${escapeHTML(classroom?.name || "")}" placeholder="Ex.: 702 - MATUTINO">
       </div>
       <div class="field">
         <label for="schoolYear">Ano escolar *</label>
-        <input id="schoolYear" name="schoolYear" maxlength="40" required value="${escapeHTML(classroom?.schoolYear || "")}" placeholder="Ex.: 7º Ano">
+        <select id="schoolYear" name="schoolYear" required>
+          <option value="">Selecione a série</option>
+          ${SCHOOL_YEAR_OPTIONS.map(year => `<option value="${escapeHTML(year)}" ${normalizeSchoolYear(classroom?.schoolYear || "") === year ? "selected" : ""}>${escapeHTML(year)}</option>`).join("")}
+        </select>
       </div>
       <div class="field">
         <label for="sheetName">Nome que aparecerá na folha *</label>
@@ -889,7 +922,7 @@ function saveClassroom(classroomId) {
   const form = $("#classroomForm");
   if (!form.reportValidity()) return;
   const name = normalizeName($("#className").value);
-  const schoolYear = normalizeName($("#schoolYear").value);
+  const schoolYear = normalizeSchoolYear($("#schoolYear").value);
   const sheetName = normalizeName($("#sheetName").value);
   const duplicate = state.classrooms.find(item => item.id !== classroomId && upperName(item.name) === upperName(name));
   if (duplicate) {
@@ -1063,30 +1096,14 @@ function deleteStudent(studentId) {
    ============================================================ */
 function renderTextLaunch() {
   const content = $("#mainContent");
-  content.innerHTML = `
-    <div class="two-column">
-      <div class="field">
-        <label for="textClassSelect">Turma</label>
-        <select id="textClassSelect"><option value="">Selecione uma turma</option>${renderClassroomOptions(state.selectedClassForTexts)}</select>
-      </div>
-      <div class="field">
-        <label>&nbsp;</label>
-        <button class="btn btn-primary" id="textClassSearchButton" type="button">Buscar alunos</button>
-      </div>
-    </div>
-    <div id="textClassResults" class="content-area">
-      ${state.classrooms.length ? emptyState("Selecione uma turma", "Escolha a turma e clique em Buscar alunos.", "▤") : emptyState("Cadastre uma turma primeiro", "Depois, cadastre alunos para começar a lançar textos.", "▤")}
-    </div>`;
-  $("#textClassSearchButton").addEventListener("click", () => {
-    const classId = $("#textClassSelect").value;
-    state.selectedClassForTexts = classId;
-    if (!classId) {
-      $("#textClassResults").innerHTML = `<div class="notice warning">Selecione uma turma antes de buscar.</div>`;
-      return;
-    }
-    renderTextStudents(classId);
-  });
-  if (state.selectedClassForTexts && getClassroom(state.selectedClassForTexts)) renderTextStudents(state.selectedClassForTexts);
+  const classId = $("#mainTextClassSelect").value;
+  state.selectedClassForTexts = classId;
+  if (!classId) {
+    content.innerHTML = `<div class="notice warning">Selecione uma turma ao lado de “Lançar textos” e clique em Buscar.</div>`;
+    return;
+  }
+  content.innerHTML = `<div id="textClassResults" class="content-area">${emptyState("Carregando alunos", "Os alunos da turma selecionada serão exibidos aqui.", "▤")}</div>`;
+  renderTextStudents(classId);
 }
 
 function renderTextStudents(classId) {
@@ -1494,10 +1511,34 @@ function generatePDF(students, filename) {
       });
 
       y += layout.authorGap;
-      pdf.setFont("times", "italic");
       pdf.setFontSize(layout.authorSize);
       pdf.setTextColor(75, 57, 63);
-      pdf.text(layout.authorLines, pageWidth - content.right, y, { align: "right" });
+      const classroom = getClassroom(student.classroomId);
+      const prefix = authorLabel(student) + " ";
+      const authorName = titleCaseName(student.name);
+      const suffix = classroom && classroom.sheetName ? " - " + classroom.sheetName : "";
+      // A única mudança visual no PDF: somente o nome do autor fica em negrito.
+      pdf.setFont("times", "italic");
+      const prefixWidth = pdf.getTextWidth(prefix);
+      const suffixWidth = pdf.getTextWidth(suffix);
+      pdf.setFont("times", "bolditalic");
+      const nameWidth = pdf.getTextWidth(authorName);
+      const totalAuthorWidth = prefixWidth + nameWidth + suffixWidth;
+      if (layout.authorLines.length === 1 && totalAuthorWidth <= maxWidth) {
+        let authorX = pageWidth - content.right - totalAuthorWidth;
+        pdf.setFont("times", "italic");
+        pdf.text(prefix, authorX, y);
+        authorX += prefixWidth;
+        pdf.setFont("times", "bolditalic");
+        pdf.text(authorName, authorX, y);
+        authorX += nameWidth;
+        pdf.setFont("times", "italic");
+        pdf.text(suffix, authorX, y);
+      } else {
+        // Preserva a quebra de linha já existente em nomes excepcionalmente longos.
+        pdf.setFont("times", "italic");
+        pdf.text(layout.authorLines, pageWidth - content.right, y, { align: "right" });
+      }
     }
 
     validStudents.forEach((student, index) => {
@@ -1510,6 +1551,84 @@ function generatePDF(students, filename) {
     console.error("Erro ao gerar PDF:", error);
     showToast("Ocorreu um erro ao gerar o PDF. Tente novamente.", "danger");
   }
+}
+
+/* ============================================================
+   Backup de dados — exportação e importação JSON
+   ============================================================ */
+function exportAllData() {
+  const payload = {
+    app: "Textos Escolares",
+    formatVersion: 1,
+    exportedAt: new Date().toISOString(),
+    version: 1,
+    classrooms: state.classrooms,
+    students: state.students
+  };
+  const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json;charset=utf-8" });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = `backup_textos_escolares_${new Date().toISOString().slice(0,10)}.json`;
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  window.setTimeout(() => URL.revokeObjectURL(url), 1000);
+  closeMenu();
+  showToast("Backup dos dados preparado para download.");
+}
+
+function importAllData(file) {
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = () => {
+    try {
+      const parsed = JSON.parse(String(reader.result || ""));
+      if (!parsed || !Array.isArray(parsed.classrooms) || !Array.isArray(parsed.students)) {
+        throw new Error("O arquivo não contém turmas e alunos em formato reconhecido.");
+      }
+      const classrooms = parsed.classrooms.map(item => ({
+        id: String(item.id || makeId("class")),
+        name: normalizeName(item.name),
+        schoolYear: normalizeName(item.schoolYear),
+        sheetName: normalizeName(item.sheetName)
+      }));
+      const classroomIds = new Set(classrooms.map(item => item.id));
+      const students = parsed.students.map(item => ({
+        id: String(item.id || makeId("student")),
+        name: normalizeName(item.name),
+        classroomId: String(item.classroomId || ""),
+        gender: ["Feminino", "Masculino", "Prefiro não informar"].includes(item.gender) ? item.gender : "Prefiro não informar",
+        textTitle: String(item.textTitle || ""),
+        textBody: String(item.textBody || "")
+      }));
+      if (classrooms.some(item => !item.name || !item.schoolYear) || students.some(item => !item.name || !classroomIds.has(item.classroomId))) {
+        throw new Error("Há turmas ou alunos com informações incompletas ou vínculos inválidos.");
+      }
+      const summary = `${classrooms.length} turma(s) e ${students.length} aluno(s)`;
+      if (!confirm(`Importar este backup com ${summary}? Os dados atuais deste navegador serão substituídos. Recomendamos exportar um backup antes de continuar.`)) return;
+      state.classrooms = classrooms;
+      state.students = students;
+      state.selectedClassForTexts = "";
+      sortClassrooms();
+      if (!persistData()) return;
+      refreshAllClassroomSelects();
+      refreshClassroomSelect($("#mainTextClassSelect"), "Selecione uma turma");
+      $("#mainContent").innerHTML = emptyState("Backup importado", `Foram restaurados ${classrooms.length} turma(s) e ${students.length} aluno(s).`, "✓");
+      showToast("Dados importados com sucesso.");
+      closeMenu();
+    } catch (error) {
+      console.error("Falha ao importar backup:", error);
+      alert(`Não foi possível importar o arquivo. ${error.message || "Verifique se ele é um backup válido do Textos Escolares."}`);
+    } finally {
+      $("#importDataFile").value = "";
+    }
+  };
+  reader.onerror = () => {
+    alert("Não foi possível ler o arquivo selecionado.");
+    $("#importDataFile").value = "";
+  };
+  reader.readAsText(file);
 }
 
 /* ============================================================
@@ -1539,14 +1658,28 @@ document.addEventListener("click", event => {
 });
 
 $("#mainSearchButton").addEventListener("click", handleMainSearch);
+$("#exportDataButton").addEventListener("click", exportAllData);
+$("#importDataButton").addEventListener("click", () => {
+  closeMenu();
+  $("#importDataFile").click();
+});
+$("#importDataFile").addEventListener("change", event => importAllData(event.target.files && event.target.files[0]));
 $("#actionSelect").addEventListener("change", () => {
-  // Ao escolher Lançar textos, a lista de turmas é mostrada imediatamente.
-  if ($("#actionSelect").value === "texts") {
+  const isTexts = $("#actionSelect").value === "texts";
+  $("#mainTextClassField").classList.toggle("hidden", !isTexts);
+  $("#mainActionRow").classList.toggle("with-class", isTexts);
+  if (isTexts) {
+    refreshClassroomSelect($("#mainTextClassSelect"), "Selecione uma turma", state.selectedClassForTexts);
     state.lastAction = "texts";
-    renderTextLaunch();
+    $("#mainContent").innerHTML = emptyState("Lançar textos", "Selecione a turma ao lado e clique em Buscar para ver os alunos.", "▤");
   } else {
     $("#mainContent").innerHTML = emptyState("Ação selecionada", "Clique em Buscar para carregar a lista correspondente.", "✦");
   }
+});
+
+$("#mainTextClassSelect").addEventListener("change", () => {
+  state.selectedClassForTexts = $("#mainTextClassSelect").value;
+  $("#mainContent").innerHTML = emptyState("Turma selecionada", "Clique em Buscar para carregar os alunos dessa turma.", "▤");
 });
 
 $("#modalClose").addEventListener("click", closeModal);
@@ -1585,6 +1718,9 @@ $("#exportStudentSearchButton").addEventListener("click", () => {
 function initializeApp() {
   loadData();
   refreshAllClassroomSelects();
+  refreshClassroomSelect($("#mainTextClassSelect"), "Selecione uma turma", state.selectedClassForTexts);
+  $("#mainTextClassField").classList.toggle("hidden", $("#actionSelect").value !== "texts");
+  $("#mainActionRow").classList.toggle("with-class", $("#actionSelect").value === "texts");
   // Mostra a ação inicial com uma instrução clara, sem alterar os dados salvos.
   $("#actionSelect").value = "classrooms";
   $("#mainContent").innerHTML = emptyState("Seu espaço de trabalho está pronto", "Selecione uma ação e clique em Buscar para começar.", "✦");
