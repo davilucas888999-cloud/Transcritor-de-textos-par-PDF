@@ -1580,18 +1580,22 @@ function generatePDF(students, filename, classReport = null) {
       if (allStudents.length) {
         allStudents.forEach((student, index) => {
           const nameLines = pdf.splitTextToSize(upperName(student.name), 125);
-          // Altura da linha inclui espaço acima e abaixo do texto, inclusive nomes quebrados.
+          // Altura consistente e alinhamento vertical centralizado em cada registro.
           const lineHeight = 4.2;
-          const rowHeight = Math.max(8, nameLines.length * lineHeight + 4);
+          const rowHeight = Math.max(9, nameLines.length * lineHeight + 4);
           if (y + rowHeight > 269) {
             pdf.addPage("a4", "portrait"); pdf.setFillColor(255,255,255); pdf.rect(0,0,210,297,"F");
             pdf.setDrawColor(139,64,85); pdf.setLineWidth(0.5); pdf.rect(12,12,186,273); y = 27; drawHead(true);
           }
-          const textY = y + 3;
-          pdf.text(String(index + 1), 28, textY); pdf.text(nameLines, 42, textY, { lineHeightFactor: 1.15 });
+          // O baseline é calculado para centralizar verticalmente o bloco do nome;
+          // número e situação ficam no mesmo eixo vertical central da linha.
+          const textY = y + (rowHeight - ((nameLines.length - 1) * lineHeight)) / 2 + 1.2;
+          const centerY = y + rowHeight / 2 + 1.2;
+          pdf.text(String(index + 1), 28, centerY);
+          pdf.text(nameLines, 42, textY, { lineHeightFactor: 1.15 });
           pdf.setFont("helvetica", "bold"); pdf.setFontSize(7.8);
           pdf.setTextColor(studentHasText(student) ? 40 : 138, studentHasText(student) ? 106 : 91, studentHasText(student) ? 77 : 20);
-          pdf.text(studentHasText(student) ? "ENVIADO" : "NÃO ENVIADO", 181, textY, { align: "right" });
+          pdf.text(studentHasText(student) ? "ENVIADO" : "NÃO ENVIADO", 181, centerY, { align: "right" });
           // A linha fica no limite inferior da linha da tabela, nunca sobre o texto.
           pdf.setDrawColor(205, 190, 195); pdf.setLineWidth(0.25);
           pdf.line(25, y + rowHeight, 185, y + rowHeight);
